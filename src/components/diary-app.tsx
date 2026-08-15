@@ -74,12 +74,14 @@ export function DiaryApp() {
   const [dialogTime, setDialogTime] = useState("")
   const [subAction, setSubAction] = useState("")
   const [confirmClear, setConfirmClear] = useState(false)
+  const [copied, setCopied] = useState(false)
   const customRoutines = useSyncExternalStore(
     subscribeCustomRoutines,
     getCustomRoutinesSnapshot,
     getCustomRoutinesServerSnapshot
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const copiedTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     const saved = loadDiaryText()
@@ -94,6 +96,14 @@ export function DiaryApp() {
     if (!textReady) return
     saveDiaryText(text)
   }, [text, textReady])
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current !== null) {
+        window.clearTimeout(copiedTimerRef.current)
+      }
+    }
+  }, [])
 
   function openStampDialog(next: StampDraft) {
     setDraft(next)
@@ -152,6 +162,38 @@ export function DiaryApp() {
     const payload = buildSendPayload(diaryDate || formatDateInput(), text)
     if (!text.trim()) return
     window.location.href = buildShortcutsUrl(payload)
+  }
+
+  function markCopied() {
+    setCopied(true)
+    if (copiedTimerRef.current !== null) {
+      window.clearTimeout(copiedTimerRef.current)
+    }
+    copiedTimerRef.current = window.setTimeout(() => {
+      setCopied(false)
+      copiedTimerRef.current = null
+    }, 2000)
+  }
+
+  async function copyDiary() {
+    const payload = buildSendPayload(diaryDate || formatDateInput(), text)
+    if (!text.trim()) return
+
+    try {
+      await navigator.clipboard.writeText(payload)
+      markCopied()
+    } catch {
+      const helper = document.createElement("textarea")
+      helper.value = payload
+      helper.setAttribute("readonly", "")
+      helper.style.position = "fixed"
+      helper.style.left = "-9999px"
+      document.body.appendChild(helper)
+      helper.select()
+      const ok = document.execCommand("copy")
+      document.body.removeChild(helper)
+      if (ok) markCopied()
+    }
   }
 
   function resetDiary() {
@@ -257,18 +299,32 @@ export function DiaryApp() {
         />
       </section>
 
-      <div className="flex gap-2 pt-4">
+      <div className="grid grid-cols-2 gap-2 pt-4">
+        <PressButton
+          onPress={() => {
+            void copyDiary()
+          }}
+          disabled={!text.trim()}
+          className={cn(
+            "inline-flex h-12 items-center justify-center rounded-2xl border px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-50",
+            copied
+              ? "border-green-200 bg-green-100 text-green-800"
+              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          {copied ? "✅ コピー完了" : "📋 コピー"}
+        </PressButton>
         <PressButton
           onPress={() => setConfirmClear(true)}
           disabled={!text}
-          className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3.5 text-base font-medium text-gray-700 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
         >
           🗑️ クリア
         </PressButton>
         <PressButton
           onPress={sendToShortcuts}
           disabled={!text.trim()}
-          className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+          className="col-span-2 inline-flex h-12 items-center justify-center gap-1.5 rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
         >
           <Send className="size-4" />
           メモアプリへ送信
