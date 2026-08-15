@@ -49,6 +49,7 @@ export function DiaryApp() {
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const copiedTimerRef = useRef<number | null>(null)
+  const [viewport, setViewport] = useState({ top: 0, height: "100dvh" })
 
   useEffect(() => {
     const saved = loadDiaryText()
@@ -69,6 +70,36 @@ export function DiaryApp() {
       if (copiedTimerRef.current !== null) {
         window.clearTimeout(copiedTimerRef.current)
       }
+    }
+  }, [])
+
+  useEffect(() => {
+    const visual = window.visualViewport
+    const lockDocumentScroll = () => {
+      window.scrollTo(0, 0)
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }
+    const syncViewport = () => {
+      lockDocumentScroll()
+      if (!visual) {
+        setViewport({ top: 0, height: "100dvh" })
+        return
+      }
+      setViewport({
+        top: visual.offsetTop,
+        height: `${Math.round(visual.height)}px`,
+      })
+    }
+
+    syncViewport()
+    visual?.addEventListener("resize", syncViewport)
+    visual?.addEventListener("scroll", syncViewport)
+    window.addEventListener("scroll", lockDocumentScroll, { passive: true })
+    return () => {
+      visual?.removeEventListener("resize", syncViewport)
+      visual?.removeEventListener("scroll", syncViewport)
+      window.removeEventListener("scroll", lockDocumentScroll)
     }
   }, [])
 
@@ -174,45 +205,53 @@ export function DiaryApp() {
   }
 
   return (
-    <div className="mx-auto flex h-dvh max-h-dvh w-full max-w-md flex-col overflow-hidden bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-30 mb-3 flex shrink-0 flex-col gap-2 bg-background">
-        <PressButton
-          onPress={() => setActionsOpen(true)}
-          className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
-        >
-          ＋ 行動を追加
-        </PressButton>
-        <div className="flex items-center gap-2">
-          <Input
-            id="diary-date"
-            type="date"
-            aria-label="日付"
-            value={diaryDate}
-            onChange={(event) => setDiaryDate(event.target.value)}
-            className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
-          />
+    <div
+      className="fixed inset-x-0 z-10 mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background"
+      style={{ top: viewport.top, height: viewport.height }}
+    >
+      <header className="sticky top-0 z-30 shrink-0 border-b border-border/80 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 shadow-sm">
+        <div className="flex flex-col gap-2">
           <PressButton
-            onPress={() => setSettingsOpen(true)}
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            onPress={() => setActionsOpen(true)}
+            className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
           >
-            ⚙️ 設定
+            ＋ 行動を追加
           </PressButton>
+          <div className="flex items-center gap-2">
+            <Input
+              id="diary-date"
+              type="date"
+              aria-label="日付"
+              value={diaryDate}
+              onChange={(event) => setDiaryDate(event.target.value)}
+              className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
+            />
+            <PressButton
+              onPress={() => setSettingsOpen(true)}
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              ⚙️ 設定
+            </PressButton>
+          </div>
         </div>
       </header>
 
-      <section className="flex min-h-0 flex-1 flex-col">
+      <section className="min-h-0 flex-1 overflow-hidden px-3 py-2.5">
         <Textarea
           id="diary-text"
           aria-label="日記"
           ref={textareaRef}
           value={text}
           onChange={(event) => setText(event.target.value)}
+          onFocus={() => {
+            window.scrollTo(0, 0)
+          }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
-          className="diary-paper min-h-0 flex-1 resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
+          className="diary-paper h-full min-h-0 resize-none overflow-y-auto rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
         />
       </section>
 
-      <div className="relative z-20 isolate mt-3 shrink-0 bg-background">
+      <div className="relative z-20 shrink-0 border-t border-border/80 bg-background px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="grid grid-cols-3 gap-2">
           <PressButton
             onPress={sendToShortcuts}
