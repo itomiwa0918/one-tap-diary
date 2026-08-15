@@ -124,6 +124,109 @@ export function StampDialog({
   )
 }
 
+const timeFieldClassName = cn(
+  "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
+  "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+)
+
+export function TimeOnlyDialog({
+  open,
+  startTime,
+  endTime,
+  onStartTimeChange,
+  onEndTimeChange,
+  onConfirm,
+  onClose,
+}: {
+  open: boolean
+  startTime: string
+  endTime: string
+  onStartTimeChange: (value: string) => void
+  onEndTimeChange: (value: string) => void
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  const startRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const frame = requestAnimationFrame(() => {
+      startRef.current?.blur()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [open])
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent
+        initialFocus={false}
+        className="top-[38%] z-[60] max-w-sm rounded-3xl p-5"
+        showCloseButton={false}
+      >
+        <DialogHeader>
+          <DialogTitle>⏱️ 時間のみ</DialogTitle>
+          <DialogDescription>
+            開始時刻を入れて確定すると、日記に時刻だけ残ります。
+          </DialogDescription>
+        </DialogHeader>
+
+        <label className="block">
+          <span className="mb-1.5 block text-sm text-muted-foreground">
+            開始時刻（必須）
+          </span>
+          <input
+            ref={startRef}
+            type="time"
+            autoFocus={false}
+            required
+            value={startTime}
+            onChange={(event) => onStartTimeChange(event.target.value)}
+            className={timeFieldClassName}
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-1.5 flex items-center justify-between text-sm text-muted-foreground">
+            終了時刻（任意）
+            {endTime ? (
+              <button
+                type="button"
+                className="text-xs text-foreground/70 underline-offset-2 hover:underline"
+                onClick={() => onEndTimeChange("")}
+              >
+                クリア
+              </button>
+            ) : null}
+          </span>
+          <input
+            type="time"
+            autoFocus={false}
+            value={endTime}
+            onChange={(event) => onEndTimeChange(event.target.value)}
+            className={timeFieldClassName}
+          />
+        </label>
+
+        <DialogFooter className="mx-0 mb-0 flex-row rounded-none border-0 bg-transparent p-0">
+          <PressButton
+            onPress={onClose}
+            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
+          >
+            キャンセル
+          </PressButton>
+          <PressButton
+            onPress={onConfirm}
+            disabled={!startTime}
+            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+          >
+            確定
+          </PressButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function ClearConfirmDialog({
   open,
   onConfirm,

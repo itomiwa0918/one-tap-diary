@@ -131,6 +131,21 @@ export function appendRoutineStamp(
   return `${current.replace(/\s+$/, "")}\n${stamp}`
 }
 
+export function formatTimeOnlyStamp(start: string, end?: string) {
+  const range = end ? `${start}〜${end}` : start
+  return `・${range} `
+}
+
+export function appendTimeOnlyStamp(
+  current: string,
+  start: string,
+  end?: string
+) {
+  const stamp = formatTimeOnlyStamp(start, end)
+  if (!current.trim()) return stamp
+  return `${current.replace(/\s+$/, "")}\n${stamp}`
+}
+
 export function buildSendPayload(isoDate: string, text: string) {
   const title = formatTitleDate(isoDate)
   const body = text.replace(/^\uFEFF/, "").replace(/^\s+/, "")

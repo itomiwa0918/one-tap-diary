@@ -9,12 +9,14 @@ import { SettingsSheet } from "@/components/settings-sheet"
 import {
   ClearConfirmDialog,
   StampDialog,
+  TimeOnlyDialog,
   type StampDraft,
 } from "@/components/stamp-dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   appendRoutineStamp,
+  appendTimeOnlyStamp,
   buildSendPayload,
   buildShortcutsUrl,
   clearDiaryText,
@@ -42,6 +44,9 @@ export function DiaryApp() {
   const [copied, setCopied] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [actionsOpen, setActionsOpen] = useState(false)
+  const [timeOnlyOpen, setTimeOnlyOpen] = useState(false)
+  const [startTime, setStartTime] = useState("")
+  const [endTime, setEndTime] = useState("")
   const customRoutines = useSyncExternalStore(
     subscribeCustomRoutines,
     getCustomRoutinesSnapshot,
@@ -118,14 +123,36 @@ export function DiaryApp() {
     setSubAction("")
   }
 
-  function stampRoutine(label: string, time: string) {
-    setText((current) => appendRoutineStamp(current, label, time))
+  function focusDiaryEnd() {
     window.setTimeout(() => {
       const el = textareaRef.current
       if (!el) return
       el.focus()
+      const end = el.value.length
+      el.setSelectionRange(end, end)
       el.scrollTop = el.scrollHeight
     }, 280)
+  }
+
+  function stampRoutine(label: string, time: string) {
+    setText((current) => appendRoutineStamp(current, label, time))
+    focusDiaryEnd()
+  }
+
+  function openTimeOnlyDialog() {
+    setActionsOpen(false)
+    window.setTimeout(() => {
+      setStartTime(formatTimeInput())
+      setEndTime("")
+      setTimeOnlyOpen(true)
+    }, 160)
+  }
+
+  function confirmTimeOnly() {
+    if (!startTime) return
+    setText((current) => appendTimeOnlyStamp(current, startTime, endTime))
+    setTimeOnlyOpen(false)
+    focusDiaryEnd()
   }
 
   function confirmStamp() {
@@ -245,7 +272,8 @@ export function DiaryApp() {
             window.scrollTo(0, 0)
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
-          className="diary-paper mb-3 min-h-[70vh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
+          rows={18}
+          className="diary-paper mb-3 min-h-[80dvh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
         />
         <div className="grid grid-cols-3 gap-2 pb-2">
           <PressButton
@@ -284,7 +312,17 @@ export function DiaryApp() {
         open={actionsOpen}
         customRoutines={customRoutines}
         onSelect={openStampDialog}
+        onSelectTimeOnly={openTimeOnlyDialog}
         onClose={() => setActionsOpen(false)}
+      />
+      <TimeOnlyDialog
+        open={timeOnlyOpen}
+        startTime={startTime}
+        endTime={endTime}
+        onStartTimeChange={setStartTime}
+        onEndTimeChange={setEndTime}
+        onConfirm={confirmTimeOnly}
+        onClose={() => setTimeOnlyOpen(false)}
       />
       <StampDialog
         draft={draft}

@@ -37,6 +37,7 @@ export function ActionSheet({
   open,
   customRoutines,
   onSelect,
+  onSelectTimeOnly,
   onClose,
 }: {
   open: boolean
@@ -46,6 +47,7 @@ export function ActionSheet({
     time: string
     subActions?: string[]
   }) => void
+  onSelectTimeOnly: () => void
   onClose: () => void
 }) {
   if (!open) return null
@@ -65,6 +67,12 @@ export function ActionSheet({
         </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          <PressButton
+            onPress={onSelectTimeOnly}
+            className="mb-2.5 flex min-h-12 w-full items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 px-2 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-200 active:bg-slate-200"
+          >
+            ⏱️ 時間のみ
+          </PressButton>
           <div className="grid grid-cols-2 gap-2.5">
             {ROUTINES.map((routine) => (
               <RoutineChip
