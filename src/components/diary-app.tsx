@@ -209,34 +209,32 @@ export function DiaryApp() {
       className="fixed inset-x-0 z-10 mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background"
       style={{ top: viewport.top, height: viewport.height }}
     >
-      <header className="sticky top-0 z-30 shrink-0 border-b border-border/80 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 shadow-sm">
-        <div className="flex flex-col gap-2">
-          <PressButton
-            onPress={() => setActionsOpen(true)}
-            className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
-          >
-            ＋ 行動を追加
-          </PressButton>
-          <div className="flex items-center gap-2">
-            <Input
-              id="diary-date"
-              type="date"
-              aria-label="日付"
-              value={diaryDate}
-              onChange={(event) => setDiaryDate(event.target.value)}
-              className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
-            />
-            <PressButton
-              onPress={() => setSettingsOpen(true)}
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              ⚙️ 設定
-            </PressButton>
-          </div>
-        </div>
+      <header className="sticky top-0 z-30 shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+        <PressButton
+          onPress={() => setActionsOpen(true)}
+          className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+        >
+          ＋ 行動を追加
+        </PressButton>
       </header>
 
-      <section className="min-h-0 flex-1 overflow-hidden px-3 py-2.5">
+      <section className="min-h-0 flex-1 overflow-y-auto px-3">
+        <div className="flex items-center gap-2 py-2">
+          <Input
+            id="diary-date"
+            type="date"
+            aria-label="日付"
+            value={diaryDate}
+            onChange={(event) => setDiaryDate(event.target.value)}
+            className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
+          />
+          <PressButton
+            onPress={() => setSettingsOpen(true)}
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            ⚙️ 設定
+          </PressButton>
+        </div>
         <Textarea
           id="diary-text"
           aria-label="日記"
@@ -247,7 +245,7 @@ export function DiaryApp() {
             window.scrollTo(0, 0)
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
-          className="diary-paper h-full min-h-0 resize-none overflow-y-auto rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
+          className="diary-paper mb-2 min-h-[70vh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
         />
       </section>
 
