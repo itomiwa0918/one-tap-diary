@@ -175,7 +175,13 @@ export function DiaryApp() {
 
   return (
     <div className="mx-auto flex h-dvh max-h-dvh w-full max-w-md flex-col overflow-hidden bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <header className="mb-3 flex shrink-0 flex-col gap-2">
+      <header className="sticky top-0 z-30 mb-3 flex shrink-0 flex-col gap-2 bg-background">
+        <PressButton
+          onPress={() => setActionsOpen(true)}
+          className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+        >
+          ＋ 行動を追加
+        </PressButton>
         <div className="flex items-center gap-2">
           <Input
             id="diary-date"
@@ -192,12 +198,6 @@ export function DiaryApp() {
             ⚙️ 設定
           </PressButton>
         </div>
-        <PressButton
-          onPress={() => setActionsOpen(true)}
-          className="relative z-20 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
-        >
-          ＋ 行動を追加
-        </PressButton>
       </header>
 
       <section className="flex min-h-0 flex-1 flex-col">
