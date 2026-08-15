@@ -170,7 +170,7 @@ export function DiaryApp() {
           htmlFor="diary-date"
           className="mt-3 mb-1.5 block text-sm text-muted-foreground"
         >
-          日記の日付
+          日付
         </label>
         <Input
           id="diary-date"
@@ -183,7 +183,7 @@ export function DiaryApp() {
 
       <section className="mb-4">
         <p className="mb-2.5 text-sm text-muted-foreground">
-          タップして行動を残す
+          行動
         </p>
         <div className="grid grid-cols-2 gap-2.5">
           {ROUTINES.map((routine) => (
@@ -218,7 +218,7 @@ export function DiaryApp() {
       </section>
 
       <section className="mb-5">
-        <p className="mb-2.5 text-sm text-muted-foreground">新しいボタン</p>
+        <p className="mb-2.5 text-sm text-muted-foreground">新ボタン</p>
         <div className="flex gap-2">
           <Input
             type="text"
@@ -245,7 +245,7 @@ export function DiaryApp() {
 
       <section className="flex min-h-0 flex-1 flex-col">
         <label htmlFor="diary-text" className="mb-2.5 text-sm text-muted-foreground">
-          今日の記録
+          日記
         </label>
         <Textarea
           id="diary-text"
