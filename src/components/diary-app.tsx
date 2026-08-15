@@ -1,22 +1,29 @@
 "use client"
 
-import { useRef, useState, useSyncExternalStore } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Send, X } from "lucide-react"
 
 import { PressButton } from "@/components/press-button"
-import { StampDialog, type StampDraft } from "@/components/stamp-dialog"
+import {
+  ClearConfirmDialog,
+  StampDialog,
+  type StampDraft,
+} from "@/components/stamp-dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   appendRoutineStamp,
   buildSendPayload,
   buildShortcutsUrl,
+  clearDiaryText,
   COLOR,
   formatDateInput,
   formatTimeInput,
   getCustomRoutinesServerSnapshot,
   getCustomRoutinesSnapshot,
+  loadDiaryText,
   ROUTINES,
+  saveDiaryText,
   subscribeCustomRoutines,
   writeCustomRoutines,
 } from "@/lib/routines"
@@ -61,16 +68,32 @@ function RoutineChip({
 export function DiaryApp() {
   const [diaryDate, setDiaryDate] = useState(formatDateInput)
   const [text, setText] = useState("")
+  const [textReady, setTextReady] = useState(false)
   const [newRoutineName, setNewRoutineName] = useState("")
   const [draft, setDraft] = useState<StampDraft | null>(null)
   const [dialogTime, setDialogTime] = useState("")
   const [subAction, setSubAction] = useState("")
+  const [confirmClear, setConfirmClear] = useState(false)
   const customRoutines = useSyncExternalStore(
     subscribeCustomRoutines,
     getCustomRoutinesSnapshot,
     getCustomRoutinesServerSnapshot
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const saved = loadDiaryText()
+    const frame = requestAnimationFrame(() => {
+      setText(saved)
+      setTextReady(true)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  useEffect(() => {
+    if (!textReady) return
+    saveDiaryText(text)
+  }, [text, textReady])
 
   function openStampDialog(next: StampDraft) {
     setDraft(next)
@@ -129,6 +152,12 @@ export function DiaryApp() {
     const payload = buildSendPayload(diaryDate || formatDateInput(), text)
     if (!text.trim()) return
     window.location.href = buildShortcutsUrl(payload)
+  }
+
+  function resetDiary() {
+    setText("")
+    clearDiaryText()
+    setConfirmClear(false)
   }
 
   return (
@@ -228,11 +257,18 @@ export function DiaryApp() {
         />
       </section>
 
-      <div className="pt-4">
+      <div className="flex gap-2 pt-4">
+        <PressButton
+          onPress={() => setConfirmClear(true)}
+          disabled={!text}
+          className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3.5 text-base font-medium text-gray-700 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
+        >
+          🗑️ クリア
+        </PressButton>
         <PressButton
           onPress={sendToShortcuts}
           disabled={!text.trim()}
-          className="inline-flex h-12 w-full items-center justify-center gap-1.5 rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
         >
           <Send className="size-4" />
           メモアプリへ送信
@@ -247,6 +283,11 @@ export function DiaryApp() {
         onSubActionChange={setSubAction}
         onConfirm={confirmStamp}
         onClose={closeStampDialog}
+      />
+      <ClearConfirmDialog
+        open={confirmClear}
+        onConfirm={resetDiary}
+        onClose={() => setConfirmClear(false)}
       />
     </div>
   )

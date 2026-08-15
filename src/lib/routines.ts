@@ -88,6 +88,20 @@ export const ROUTINES: Routine[] = [
 ]
 
 export const CUSTOM_ROUTINES_STORAGE_KEY = "one-tap-diary:custom-routines"
+export const DIARY_TEXT_STORAGE_KEY = "one-tap-diary:diary-text"
+
+export function loadDiaryText() {
+  if (typeof window === "undefined") return ""
+  return window.localStorage.getItem(DIARY_TEXT_STORAGE_KEY) ?? ""
+}
+
+export function saveDiaryText(text: string) {
+  window.localStorage.setItem(DIARY_TEXT_STORAGE_KEY, text)
+}
+
+export function clearDiaryText() {
+  window.localStorage.removeItem(DIARY_TEXT_STORAGE_KEY)
+}
 
 export function pad2(value: number) {
   return String(value).padStart(2, "0")

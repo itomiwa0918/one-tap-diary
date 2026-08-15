@@ -107,3 +107,43 @@ export function StampDialog({
     </Dialog>
   )
 }
+
+export function ClearConfirmDialog({
+  open,
+  onConfirm,
+  onClose,
+}: {
+  open: boolean
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent
+        className="max-w-sm rounded-3xl p-5"
+        showCloseButton={false}
+      >
+        <DialogHeader>
+          <DialogTitle>入力内容をリセットしますか？</DialogTitle>
+          <DialogDescription>
+            今日の記録と自動保存した下書きを削除します。この操作は取り消せません。
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mx-0 mb-0 rounded-none border-0 bg-transparent p-0 sm:flex-row">
+          <PressButton
+            onPress={onClose}
+            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
+          >
+            キャンセル
+          </PressButton>
+          <PressButton
+            onPress={onConfirm}
+            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+          >
+            OK
+          </PressButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
