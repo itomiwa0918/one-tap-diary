@@ -52,7 +52,7 @@ export function StampDialog({
     <Dialog open={draft !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         initialFocus={false}
-        className="top-[38%] max-w-sm rounded-3xl p-5"
+        className="top-[38%] z-[60] max-w-sm rounded-3xl p-5"
         showCloseButton={false}
       >
         <DialogHeader>

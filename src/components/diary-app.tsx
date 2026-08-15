@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Send } from "lucide-react"
 
+import { ActionSheet } from "@/components/action-sheet"
 import { PressButton } from "@/components/press-button"
 import { SettingsSheet } from "@/components/settings-sheet"
 import {
@@ -17,7 +18,6 @@ import {
   buildSendPayload,
   buildShortcutsUrl,
   clearDiaryText,
-  COLOR,
   formatDateInput,
   formatTimeInput,
   getCustomRoutinesServerSnapshot,
@@ -30,28 +30,6 @@ import {
 } from "@/lib/routines"
 import { cn } from "@/lib/utils"
 
-function RoutineChip({
-  label,
-  className,
-  onPress,
-}: {
-  label: string
-  className: string
-  onPress: () => void
-}) {
-  return (
-    <PressButton
-      onPress={onPress}
-      className={cn(
-        "flex h-auto min-h-14 w-full items-center justify-center rounded-2xl border px-2 py-3 text-[0.95rem] font-medium",
-        className
-      )}
-    >
-      {label}
-    </PressButton>
-  )
-}
-
 export function DiaryApp() {
   const [diaryDate, setDiaryDate] = useState(formatDateInput)
   const [text, setText] = useState("")
@@ -63,6 +41,7 @@ export function DiaryApp() {
   const [confirmClear, setConfirmClear] = useState(false)
   const [copied, setCopied] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [actionsOpen, setActionsOpen] = useState(false)
   const customRoutines = useSyncExternalStore(
     subscribeCustomRoutines,
     getCustomRoutinesSnapshot,
@@ -94,9 +73,13 @@ export function DiaryApp() {
   }, [])
 
   function openStampDialog(next: StampDraft) {
-    setDraft(next)
-    setDialogTime(next.time)
-    setSubAction(next.subActions?.[0] ?? "")
+    setActionsOpen(false)
+    const time = next.time || formatTimeInput()
+    window.setTimeout(() => {
+      setDraft({ ...next, time })
+      setDialogTime(time)
+      setSubAction(next.subActions?.[0] ?? "")
+    }, 160)
   }
 
   function closeStampDialog() {
@@ -106,12 +89,12 @@ export function DiaryApp() {
 
   function stampRoutine(label: string, time: string) {
     setText((current) => appendRoutineStamp(current, label, time))
-    requestAnimationFrame(() => {
+    window.setTimeout(() => {
       const el = textareaRef.current
       if (!el) return
       el.focus()
       el.scrollTop = el.scrollHeight
-    })
+    }, 280)
   }
 
   function confirmStamp() {
@@ -191,60 +174,23 @@ export function DiaryApp() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-3 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground">
-            らくらく日記メーカー
-          </p>
-          <PressButton
-            onPress={() => setSettingsOpen(true)}
-            className="inline-flex h-9 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            ⚙️ 設定
-          </PressButton>
-        </div>
+    <div className="mx-auto flex h-dvh max-h-dvh w-full max-w-md flex-col overflow-hidden bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <header className="mb-3 flex shrink-0 items-center gap-2">
         <Input
           id="diary-date"
           type="date"
           aria-label="日付"
           value={diaryDate}
           onChange={(event) => setDiaryDate(event.target.value)}
-          className="mt-3 h-12 rounded-2xl bg-card px-3 text-base"
+          className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
         />
+        <PressButton
+          onPress={() => setSettingsOpen(true)}
+          className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        >
+          ⚙️ 設定
+        </PressButton>
       </header>
-
-      <section className="mb-4">
-        <div className="grid grid-cols-2 gap-2.5">
-          {ROUTINES.map((routine) => (
-            <RoutineChip
-              key={routine.id}
-              label={routine.label}
-              className={routine.className}
-              onPress={() =>
-                openStampDialog({
-                  label: routine.label,
-                  time: routine.defaultTime,
-                  subActions: routine.subActions,
-                })
-              }
-            />
-          ))}
-          {customRoutines.map((routine) => (
-            <RoutineChip
-              key={routine.id}
-              label={routine.label}
-              className={COLOR.custom}
-              onPress={() =>
-                openStampDialog({
-                  label: routine.label,
-                  time: formatTimeInput(),
-                })
-              }
-            />
-          ))}
-        </div>
-      </section>
 
       <section className="flex min-h-0 flex-1 flex-col">
         <Textarea
@@ -253,43 +199,57 @@ export function DiaryApp() {
           ref={textareaRef}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={"ボタンで行動をスタンプしたあと、\nいまの気持ちや考えを書き足せます。"}
-          className="diary-paper min-h-72 flex-1 resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
+          placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
+          className="diary-paper min-h-0 flex-1 resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
         />
       </section>
 
-      <div className="grid grid-cols-2 gap-2 pt-4">
+      <div className="mt-3 flex shrink-0 flex-col gap-2">
         <PressButton
-          onPress={() => {
-            void copyDiary()
-          }}
-          disabled={!text.trim()}
-          className={cn(
-            "inline-flex h-12 items-center justify-center rounded-2xl border px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-50",
-            copied
-              ? "border-green-200 bg-green-100 text-green-800"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-          )}
+          onPress={() => setActionsOpen(true)}
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
         >
-          {copied ? "✅ コピー完了" : "📋 コピー"}
+          ＋ 行動を追加
         </PressButton>
-        <PressButton
-          onPress={() => setConfirmClear(true)}
-          disabled={!text}
-          className="inline-flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
-        >
-          🗑️ クリア
-        </PressButton>
-        <PressButton
-          onPress={sendToShortcuts}
-          disabled={!text.trim()}
-          className="col-span-2 inline-flex h-12 items-center justify-center gap-1.5 rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
-        >
-          <Send className="size-4" />
-          メモアプリへ送信
-        </PressButton>
+        <div className="grid grid-cols-3 gap-2">
+          <PressButton
+            onPress={sendToShortcuts}
+            disabled={!text.trim()}
+            className="inline-flex h-11 items-center justify-center gap-1 rounded-2xl bg-primary/90 px-1 text-xs font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+          >
+            <Send className="size-3.5" />
+            メモ送信
+          </PressButton>
+          <PressButton
+            onPress={() => {
+              void copyDiary()
+            }}
+            disabled={!text.trim()}
+            className={cn(
+              "inline-flex h-11 items-center justify-center rounded-2xl border px-1 text-xs font-medium disabled:pointer-events-none disabled:opacity-50",
+              copied
+                ? "border-green-200 bg-green-100 text-green-800"
+                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+            )}
+          >
+            {copied ? "✅ 完了" : "📋 コピー"}
+          </PressButton>
+          <PressButton
+            onPress={() => setConfirmClear(true)}
+            disabled={!text}
+            className="inline-flex h-11 items-center justify-center rounded-2xl border border-gray-200 bg-white px-1 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
+          >
+            🗑️ クリア
+          </PressButton>
+        </div>
       </div>
 
+      <ActionSheet
+        open={actionsOpen}
+        customRoutines={customRoutines}
+        onSelect={openStampDialog}
+        onClose={() => setActionsOpen(false)}
+      />
       <StampDialog
         draft={draft}
         time={dialogTime}
