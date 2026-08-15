@@ -48,8 +48,10 @@ export function ActionSheet({
   }) => void
   onClose: () => void
 }) {
+  if (!open) return null
+
   return (
-    <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+    <Sheet open onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <SheetContent
         side="bottom"
         showCloseButton={false}

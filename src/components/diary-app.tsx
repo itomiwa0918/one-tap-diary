@@ -204,7 +204,7 @@ export function DiaryApp() {
         />
       </section>
 
-      <div className="mt-3 flex shrink-0 flex-col gap-2">
+      <div className="relative z-20 isolate mt-3 flex shrink-0 flex-col gap-2 bg-background">
         <PressButton
           onPress={() => setActionsOpen(true)}
           className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
