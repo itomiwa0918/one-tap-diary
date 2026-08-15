@@ -135,7 +135,7 @@ export function DiaryApp() {
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="mb-5">
         <p className="text-xs font-medium tracking-wide text-muted-foreground">
-          ルーティン日記
+          らくらく日記メーカー
         </p>
         <label
           htmlFor="diary-date"

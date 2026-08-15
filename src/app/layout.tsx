@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "ルーティン日記",
+  title: "らくらく日記メーカー",
   description: "1タップで今日の行動を日記に残す",
   appleWebApp: {
     capable: true,
-    title: "ルーティン日記",
+    title: "らくらく日記メーカー",
     statusBarStyle: "default",
   },
 }
