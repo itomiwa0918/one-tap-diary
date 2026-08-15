@@ -218,7 +218,7 @@ export function DiaryApp() {
         </PressButton>
       </header>
 
-      <section className="min-h-0 flex-1 overflow-y-auto px-3">
+      <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-2 py-2">
           <Input
             id="diary-date"
@@ -245,12 +245,9 @@ export function DiaryApp() {
             window.scrollTo(0, 0)
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
-          className="diary-paper mb-2 min-h-[70vh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
+          className="diary-paper mb-3 min-h-[70vh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
         />
-      </section>
-
-      <div className="relative z-20 shrink-0 border-t border-border/80 bg-background px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 pb-2">
           <PressButton
             onPress={sendToShortcuts}
             disabled={!text.trim()}
@@ -281,7 +278,7 @@ export function DiaryApp() {
             🗑️ クリア
           </PressButton>
         </div>
-      </div>
+      </section>
 
       <ActionSheet
         open={actionsOpen}
