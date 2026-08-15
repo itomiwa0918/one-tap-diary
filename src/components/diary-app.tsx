@@ -191,8 +191,8 @@ export function DiaryApp() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-5">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-3 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <header className="mb-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-medium tracking-wide text-muted-foreground">
             らくらく日記メーカー
@@ -214,7 +214,7 @@ export function DiaryApp() {
         />
       </header>
 
-      <section className="mb-5">
+      <section className="mb-4">
         <div className="grid grid-cols-2 gap-2.5">
           {ROUTINES.map((routine) => (
             <RoutineChip
@@ -254,7 +254,7 @@ export function DiaryApp() {
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder={"ボタンで行動をスタンプしたあと、\nいまの気持ちや考えを書き足せます。"}
-          className="diary-paper min-h-48 flex-1 resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
+          className="diary-paper min-h-72 flex-1 resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-fixed"
         />
       </section>
 
