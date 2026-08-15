@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
-import { Send, X } from "lucide-react"
+import { Send } from "lucide-react"
 
 import { PressButton } from "@/components/press-button"
+import { SettingsSheet } from "@/components/settings-sheet"
 import {
   ClearConfirmDialog,
   StampDialog,
@@ -33,35 +34,21 @@ function RoutineChip({
   label,
   className,
   onPress,
-  onRemove,
 }: {
   label: string
   className: string
   onPress: () => void
-  onRemove?: () => void
 }) {
   return (
-    <div className="relative">
-      <PressButton
-        onPress={onPress}
-        className={cn(
-          "flex h-auto min-h-14 w-full items-center justify-center rounded-2xl border px-2 py-3 text-[0.95rem] font-medium",
-          onRemove && "pr-8",
-          className
-        )}
-      >
-        {label}
-      </PressButton>
-      {onRemove ? (
-        <PressButton
-          ariaLabel={`${label}を削除`}
-          onPress={onRemove}
-          className="absolute top-1.5 right-1.5 flex size-7 items-center justify-center rounded-full bg-white/80 text-stone-500"
-        >
-          <X className="size-3.5" />
-        </PressButton>
-      ) : null}
-    </div>
+    <PressButton
+      onPress={onPress}
+      className={cn(
+        "flex h-auto min-h-14 w-full items-center justify-center rounded-2xl border px-2 py-3 text-[0.95rem] font-medium",
+        className
+      )}
+    >
+      {label}
+    </PressButton>
   )
 }
 
@@ -75,6 +62,7 @@ export function DiaryApp() {
   const [subAction, setSubAction] = useState("")
   const [confirmClear, setConfirmClear] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const customRoutines = useSyncExternalStore(
     subscribeCustomRoutines,
     getCustomRoutinesSnapshot,
@@ -205,28 +193,28 @@ export function DiaryApp() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="mb-5">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground">
-          らくらく日記メーカー
-        </p>
-        <label
-          htmlFor="diary-date"
-          className="mt-3 mb-1.5 block text-sm text-muted-foreground"
-        >
-          日付
-        </label>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
+            らくらく日記メーカー
+          </p>
+          <PressButton
+            onPress={() => setSettingsOpen(true)}
+            className="inline-flex h-9 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            ⚙️ 設定
+          </PressButton>
+        </div>
         <Input
           id="diary-date"
           type="date"
+          aria-label="日付"
           value={diaryDate}
           onChange={(event) => setDiaryDate(event.target.value)}
-          className="h-12 rounded-2xl bg-card px-3 text-base"
+          className="mt-3 h-12 rounded-2xl bg-card px-3 text-base"
         />
       </header>
 
-      <section className="mb-4">
-        <p className="mb-2.5 text-sm text-muted-foreground">
-          行動
-        </p>
+      <section className="mb-5">
         <div className="grid grid-cols-2 gap-2.5">
           {ROUTINES.map((routine) => (
             <RoutineChip
@@ -253,44 +241,15 @@ export function DiaryApp() {
                   time: formatTimeInput(),
                 })
               }
-              onRemove={() => removeCustomRoutine(routine.id)}
             />
           ))}
         </div>
       </section>
 
-      <section className="mb-5">
-        <p className="mb-2.5 text-sm text-muted-foreground">新ボタン</p>
-        <div className="flex gap-2">
-          <Input
-            type="text"
-            value={newRoutineName}
-            onChange={(event) => setNewRoutineName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault()
-                addCustomRoutine()
-              }
-            }}
-            placeholder="ボタン名を入力"
-            className="h-12 rounded-2xl bg-card px-3 text-base"
-          />
-          <PressButton
-            onPress={addCustomRoutine}
-            disabled={!newRoutineName.trim()}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-1 rounded-2xl bg-primary px-3.5 text-sm font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
-          >
-            ＋追加
-          </PressButton>
-        </div>
-      </section>
-
       <section className="flex min-h-0 flex-1 flex-col">
-        <label htmlFor="diary-text" className="mb-2.5 text-sm text-muted-foreground">
-          日記
-        </label>
         <Textarea
           id="diary-text"
+          aria-label="日記"
           ref={textareaRef}
           value={text}
           onChange={(event) => setText(event.target.value)}
@@ -344,6 +303,15 @@ export function DiaryApp() {
         open={confirmClear}
         onConfirm={resetDiary}
         onClose={() => setConfirmClear(false)}
+      />
+      <SettingsSheet
+        open={settingsOpen}
+        newRoutineName={newRoutineName}
+        customRoutines={customRoutines}
+        onNewRoutineNameChange={setNewRoutineName}
+        onAdd={addCustomRoutine}
+        onRemove={removeCustomRoutine}
+        onClose={() => setSettingsOpen(false)}
       />
     </div>
   )
