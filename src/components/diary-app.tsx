@@ -175,20 +175,28 @@ export function DiaryApp() {
 
   return (
     <div className="mx-auto flex h-dvh max-h-dvh w-full max-w-md flex-col overflow-hidden bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <header className="mb-3 flex shrink-0 items-center gap-2">
-        <Input
-          id="diary-date"
-          type="date"
-          aria-label="日付"
-          value={diaryDate}
-          onChange={(event) => setDiaryDate(event.target.value)}
-          className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
-        />
+      <header className="mb-3 flex shrink-0 flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Input
+            id="diary-date"
+            type="date"
+            aria-label="日付"
+            value={diaryDate}
+            onChange={(event) => setDiaryDate(event.target.value)}
+            className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
+          />
+          <PressButton
+            onPress={() => setSettingsOpen(true)}
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            ⚙️ 設定
+          </PressButton>
+        </div>
         <PressButton
-          onPress={() => setSettingsOpen(true)}
-          className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          onPress={() => setActionsOpen(true)}
+          className="relative z-20 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
         >
-          ⚙️ 設定
+          ＋ 行動を追加
         </PressButton>
       </header>
 
@@ -204,13 +212,7 @@ export function DiaryApp() {
         />
       </section>
 
-      <div className="relative z-20 isolate mt-3 flex shrink-0 flex-col gap-2 bg-background">
-        <PressButton
-          onPress={() => setActionsOpen(true)}
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
-        >
-          ＋ 行動を追加
-        </PressButton>
+      <div className="relative z-20 isolate mt-3 shrink-0 bg-background">
         <div className="grid grid-cols-3 gap-2">
           <PressButton
             onPress={sendToShortcuts}
