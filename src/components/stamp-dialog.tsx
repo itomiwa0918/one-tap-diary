@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useRef } from "react"
+
 import { PressButton } from "@/components/press-button"
 import {
   Dialog,
@@ -9,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils"
 
@@ -37,17 +38,27 @@ export function StampDialog({
   onClose: () => void
 }) {
   const subActions = draft?.subActions ?? []
+  const timeInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!draft) return
+    const frame = requestAnimationFrame(() => {
+      timeInputRef.current?.blur()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [draft])
 
   return (
     <Dialog open={draft !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-sm rounded-3xl p-5"
+        initialFocus={false}
+        className="top-[38%] max-w-sm rounded-3xl p-5"
         showCloseButton={false}
       >
         <DialogHeader>
           <DialogTitle>{draft?.label}の時刻</DialogTitle>
           <DialogDescription>
-            時刻を確認して、必要なら直してから確定してください。
+            時刻が合っていれば、そのまま確定できます。
           </DialogDescription>
         </DialogHeader>
 
@@ -55,11 +66,16 @@ export function StampDialog({
           <span className="mb-1.5 block text-sm text-muted-foreground">
             時刻
           </span>
-          <Input
+          <input
+            ref={timeInputRef}
             type="time"
+            autoFocus={false}
             value={time}
             onChange={(event) => onTimeChange(event.target.value)}
-            className="h-12 rounded-2xl bg-background px-3 text-base"
+            className={cn(
+              "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
+              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            )}
           />
         </label>
 
@@ -89,16 +105,16 @@ export function StampDialog({
           </div>
         ) : null}
 
-        <DialogFooter className="mx-0 mb-0 rounded-none border-0 bg-transparent p-0 sm:flex-row">
+        <DialogFooter className="mx-0 mb-0 flex-row rounded-none border-0 bg-transparent p-0">
           <PressButton
             onPress={onClose}
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
+            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
           >
             キャンセル
           </PressButton>
           <PressButton
             onPress={onConfirm}
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
           >
             確定
           </PressButton>
