@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Send } from "lucide-react"
 
-import { ActionSheet } from "@/components/action-sheet"
+import { ActionMenu } from "@/components/action-sheet"
 import { PressButton } from "@/components/press-button"
 import { SettingsSheet } from "@/components/settings-sheet"
 import {
@@ -15,13 +15,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  appendRoutineStamp,
-  appendTimeOnlyStamp,
   buildSendPayload,
   buildShortcutsUrl,
   clearDiaryText,
   formatDateInput,
+  formatRoutineStamp,
   formatTimeInput,
+  formatTimeOnlyStamp,
+  insertAtCursor,
   getCustomRoutinesServerSnapshot,
   getCustomRoutinesSnapshot,
   loadDiaryText,
@@ -54,6 +55,9 @@ export function DiaryApp() {
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const copiedTimerRef = useRef<number | null>(null)
+  const cursorRef = useRef({ start: 0, end: 0 })
+  const cursorTouchedRef = useRef(false)
+  const pendingCursorRef = useRef<number | null>(null)
   const [viewport, setViewport] = useState({ top: 0, height: "100dvh" })
 
   useEffect(() => {
@@ -69,6 +73,18 @@ export function DiaryApp() {
     if (!textReady) return
     saveDiaryText(text)
   }, [text, textReady])
+
+  useEffect(() => {
+    const pos = pendingCursorRef.current
+    if (pos === null) return
+    pendingCursorRef.current = null
+    const el = textareaRef.current
+    if (!el) return
+    el.focus()
+    el.setSelectionRange(pos, pos)
+    cursorRef.current = { start: pos, end: pos }
+    cursorTouchedRef.current = true
+  }, [text])
 
   useEffect(() => {
     return () => {
@@ -108,14 +124,60 @@ export function DiaryApp() {
     }
   }, [])
 
+  function captureCursor() {
+    const el = textareaRef.current
+    if (!el || document.activeElement !== el) return
+    cursorTouchedRef.current = true
+    cursorRef.current = {
+      start: el.selectionStart ?? el.value.length,
+      end: el.selectionEnd ?? el.value.length,
+    }
+  }
+
+  function focusDiaryAt(pos: number) {
+    const apply = () => {
+      const el = textareaRef.current
+      if (!el) return
+      el.focus()
+      el.setSelectionRange(pos, pos)
+      cursorRef.current = { start: pos, end: pos }
+      cursorTouchedRef.current = true
+    }
+    requestAnimationFrame(apply)
+    window.setTimeout(apply, 280)
+  }
+
+  function applyText(next: string, cursor?: number) {
+    saveDiaryText(next)
+    if (cursor !== undefined) {
+      pendingCursorRef.current = cursor
+      cursorRef.current = { start: cursor, end: cursor }
+      cursorTouchedRef.current = true
+    }
+    setText(next)
+  }
+
+  function insertStamp(stamp: string) {
+    const fallback = text.length
+    const start = cursorTouchedRef.current ? cursorRef.current.start : fallback
+    const end = cursorTouchedRef.current ? cursorRef.current.end : fallback
+    const result = insertAtCursor(text, stamp, start, end)
+    applyText(result.text, result.cursor)
+    focusDiaryAt(result.cursor)
+  }
+
+  function toggleActions() {
+    captureCursor()
+    setActionsOpen((open) => !open)
+  }
+
   function openStampDialog(next: StampDraft) {
+    captureCursor()
     setActionsOpen(false)
     const time = next.time || formatTimeInput()
-    window.setTimeout(() => {
-      setDraft({ ...next, time })
-      setDialogTime(time)
-      setSubAction(next.subActions?.[0] ?? "")
-    }, 160)
+    setDraft({ ...next, time })
+    setDialogTime(time)
+    setSubAction(next.subActions?.[0] ?? "")
   }
 
   function closeStampDialog() {
@@ -123,36 +185,22 @@ export function DiaryApp() {
     setSubAction("")
   }
 
-  function focusDiaryEnd() {
-    window.setTimeout(() => {
-      const el = textareaRef.current
-      if (!el) return
-      el.focus()
-      const end = el.value.length
-      el.setSelectionRange(end, end)
-      el.scrollTop = el.scrollHeight
-    }, 280)
-  }
-
   function stampRoutine(label: string, time: string) {
-    setText((current) => appendRoutineStamp(current, label, time))
-    focusDiaryEnd()
+    insertStamp(formatRoutineStamp(label, time))
   }
 
   function openTimeOnlyDialog() {
+    captureCursor()
     setActionsOpen(false)
-    window.setTimeout(() => {
-      setStartTime(formatTimeInput())
-      setEndTime("")
-      setTimeOnlyOpen(true)
-    }, 160)
+    setStartTime(formatTimeInput())
+    setEndTime("")
+    setTimeOnlyOpen(true)
   }
 
   function confirmTimeOnly() {
     if (!startTime) return
-    setText((current) => appendTimeOnlyStamp(current, startTime, endTime))
+    insertStamp(formatTimeOnlyStamp(startTime, endTime))
     setTimeOnlyOpen(false)
-    focusDiaryEnd()
   }
 
   function confirmStamp() {
@@ -226,6 +274,9 @@ export function DiaryApp() {
   }
 
   function resetDiary() {
+    pendingCursorRef.current = 0
+    cursorRef.current = { start: 0, end: 0 }
+    cursorTouchedRef.current = false
     setText("")
     clearDiaryText()
     setConfirmClear(false)
@@ -238,11 +289,19 @@ export function DiaryApp() {
     >
       <header className="sticky top-0 z-30 shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <PressButton
-          onPress={() => setActionsOpen(true)}
+          onPress={toggleActions}
+          ariaExpanded={actionsOpen}
           className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
         >
-          ＋ 行動を追加
+          {actionsOpen ? "閉じる" : "＋ 行動を追加"}
         </PressButton>
+        <ActionMenu
+          open={actionsOpen}
+          customRoutines={customRoutines}
+          onSelect={openStampDialog}
+          onSelectTimeOnly={openTimeOnlyDialog}
+          onClose={() => setActionsOpen(false)}
+        />
       </header>
 
       <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
@@ -267,8 +326,20 @@ export function DiaryApp() {
           aria-label="日記"
           ref={textareaRef}
           value={text}
-          onChange={(event) => setText(event.target.value)}
+          onChange={(event) => {
+            const next = event.target.value
+            cursorTouchedRef.current = true
+            cursorRef.current = {
+              start: event.target.selectionStart ?? next.length,
+              end: event.target.selectionEnd ?? next.length,
+            }
+            applyText(next)
+          }}
+          onSelect={captureCursor}
+          onClick={captureCursor}
+          onKeyUp={captureCursor}
           onFocus={() => {
+            captureCursor()
             window.scrollTo(0, 0)
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
@@ -308,13 +379,6 @@ export function DiaryApp() {
         </div>
       </section>
 
-      <ActionSheet
-        open={actionsOpen}
-        customRoutines={customRoutines}
-        onSelect={openStampDialog}
-        onSelectTimeOnly={openTimeOnlyDialog}
-        onClose={() => setActionsOpen(false)}
-      />
       <TimeOnlyDialog
         open={timeOnlyOpen}
         startTime={startTime}

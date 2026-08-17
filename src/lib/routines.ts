@@ -21,6 +21,8 @@ export const COLOR = {
   gray: "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 active:bg-gray-200",
   custom:
     "bg-white text-gray-700 border-gray-200 hover:bg-gray-100 active:bg-gray-100",
+  indigo:
+    "bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 active:bg-indigo-200",
 } as const
 
 export const ROUTINES: Routine[] = [
@@ -35,6 +37,12 @@ export const ROUTINES: Routine[] = [
     label: "👶子供送り",
     defaultTime: "08:30",
     className: COLOR.yellow,
+  },
+  {
+    id: "work",
+    label: "👩‍💻 仕事",
+    defaultTime: "09:00",
+    className: COLOR.indigo,
   },
   {
     id: "housework",
@@ -121,14 +129,8 @@ export function formatTitleDate(isoDate: string) {
   return `${year}/${month}/${day}`
 }
 
-export function appendRoutineStamp(
-  current: string,
-  label: string,
-  time: string
-) {
-  const stamp = `・${time} ${label}`
-  if (!current.trim()) return stamp
-  return `${current.replace(/\s+$/, "")}\n${stamp}`
+export function formatRoutineStamp(label: string, time: string) {
+  return `・${time} ${label}`
 }
 
 export function formatTimeOnlyStamp(start: string, end?: string) {
@@ -136,14 +138,22 @@ export function formatTimeOnlyStamp(start: string, end?: string) {
   return `・${range} `
 }
 
-export function appendTimeOnlyStamp(
+export function insertAtCursor(
   current: string,
-  start: string,
-  end?: string
+  stamp: string,
+  start: number,
+  end: number
 ) {
-  const stamp = formatTimeOnlyStamp(start, end)
-  if (!current.trim()) return stamp
-  return `${current.replace(/\s+$/, "")}\n${stamp}`
+  const from = Math.max(0, Math.min(start, current.length))
+  const to = Math.max(from, Math.min(end, current.length))
+  const before = current.slice(0, from)
+  const after = current.slice(to)
+  const prefix = before.length > 0 && !before.endsWith("\n") ? "\n" : ""
+  const chunk = `${prefix}${stamp}`
+  return {
+    text: `${before}${chunk}${after}`,
+    cursor: before.length + chunk.length,
+  }
 }
 
 export function buildSendPayload(isoDate: string, text: string) {
