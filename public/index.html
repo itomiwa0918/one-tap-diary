@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>らくらく日記メーカー｜卒業制作</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans JP"', "sans-serif"],
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50/90 to-amber-50 font-sans text-slate-800 antialiased">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+
+    <header class="mb-8 text-center sm:mb-12">
+      <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/70 px-4 py-1.5 text-xs font-medium text-orange-700 shadow-sm">
+        <i data-lucide="sparkles" class="size-3.5 text-rose-500"></i>
+        卒業制作 プロジェクト発表
+      </div>
+      <h1 class="text-2xl font-black leading-tight tracking-tight text-rose-900 sm:text-3xl md:text-4xl lg:text-[2.6rem]">
+        らくらく日記メーカー
+        <span class="mt-2 block text-lg font-bold leading-snug text-orange-600 sm:text-xl md:text-2xl">
+          〜ルーチンの自動化で心の余白を生み出す〜
+        </span>
+      </h1>
+    </header>
+
+    <figure class="mb-10 sm:mb-14">
+      <div class="rounded-3xl border border-orange-100/90 bg-gradient-to-br from-white/95 to-orange-50/40 p-4 shadow-sm sm:p-6 lg:p-8">
+        <div class="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 lg:gap-6">
+
+          <div class="mx-auto w-full max-w-[200px]">
+            <div class="rounded-[1.7rem] border-[5px] border-slate-800 bg-slate-800 p-1 shadow-xl shadow-rose-200/40 ring-1 ring-slate-700/40">
+              <div class="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-b from-rose-50 via-orange-50 to-amber-50">
+                <div class="absolute left-1/2 top-1.5 z-10 h-2.5 w-12 -translate-x-1/2 rounded-full bg-slate-900" aria-hidden="true"></div>
+                <img
+                  src="app-screenshot-1.png"
+                  alt="らくらく日記メーカーの操作画面 1"
+                  class="block h-auto min-h-[240px] w-full object-cover object-top sm:min-h-[280px]"
+                  onerror="this.classList.add('hidden'); document.getElementById('shot-fallback-1').classList.remove('hidden');"
+                />
+                <div id="shot-fallback-1" class="hidden flex min-h-[240px] flex-col items-center justify-center gap-2 px-3 py-10 text-center sm:min-h-[280px]">
+                  <div class="flex size-10 items-center justify-center rounded-xl bg-white/90 shadow-sm ring-1 ring-rose-100">
+                    <i data-lucide="smartphone" class="size-5 text-rose-400"></i>
+                  </div>
+                  <p class="text-[11px] font-bold text-rose-800">画面 1</p>
+                  <p class="text-[10px] leading-relaxed text-orange-800/70">
+                    <span class="font-bold text-orange-600">app-screenshot-1.png</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mx-auto w-full max-w-[200px]">
+            <div class="rounded-[1.7rem] border-[5px] border-slate-800 bg-slate-800 p-1 shadow-xl shadow-rose-200/40 ring-1 ring-slate-700/40">
+              <div class="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-b from-rose-50 via-orange-50 to-amber-50">
+                <div class="absolute left-1/2 top-1.5 z-10 h-2.5 w-12 -translate-x-1/2 rounded-full bg-slate-900" aria-hidden="true"></div>
+                <img
+                  src="app-screenshot-2.png"
+                  alt="らくらく日記メーカーの操作画面 2"
+                  class="block h-auto min-h-[240px] w-full object-cover object-top sm:min-h-[280px]"
+                  onerror="this.classList.add('hidden'); document.getElementById('shot-fallback-2').classList.remove('hidden');"
+                />
+                <div id="shot-fallback-2" class="hidden flex min-h-[240px] flex-col items-center justify-center gap-2 px-3 py-10 text-center sm:min-h-[280px]">
+                  <div class="flex size-10 items-center justify-center rounded-xl bg-white/90 shadow-sm ring-1 ring-rose-100">
+                    <i data-lucide="smartphone" class="size-5 text-rose-400"></i>
+                  </div>
+                  <p class="text-[11px] font-bold text-rose-800">画面 2</p>
+                  <p class="text-[10px] leading-relaxed text-orange-800/70">
+                    <span class="font-bold text-orange-600">app-screenshot-2.png</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mx-auto w-full max-w-[200px]">
+            <div class="rounded-[1.7rem] border-[5px] border-slate-800 bg-slate-800 p-1 shadow-xl shadow-rose-200/40 ring-1 ring-slate-700/40">
+              <div class="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-b from-rose-50 via-orange-50 to-amber-50">
+                <div class="absolute left-1/2 top-1.5 z-10 h-2.5 w-12 -translate-x-1/2 rounded-full bg-slate-900" aria-hidden="true"></div>
+                <img
+                  src="app-screenshot-3.png"
+                  alt="らくらく日記メーカーの操作画面 3"
+                  class="block h-auto min-h-[240px] w-full object-cover object-top sm:min-h-[280px]"
+                  onerror="this.classList.add('hidden'); document.getElementById('shot-fallback-3').classList.remove('hidden');"
+                />
+                <div id="shot-fallback-3" class="hidden flex min-h-[240px] flex-col items-center justify-center gap-2 px-3 py-10 text-center sm:min-h-[280px]">
+                  <div class="flex size-10 items-center justify-center rounded-xl bg-white/90 shadow-sm ring-1 ring-rose-100">
+                    <i data-lucide="smartphone" class="size-5 text-rose-400"></i>
+                  </div>
+                  <p class="text-[11px] font-bold text-rose-800">画面 3</p>
+                  <p class="text-[10px] leading-relaxed text-orange-800/70">
+                    <span class="font-bold text-orange-600">app-screenshot-3.png</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mx-auto w-full max-w-[200px]">
+            <div class="rounded-[1.7rem] border-[5px] border-slate-800 bg-slate-800 p-1 shadow-xl shadow-rose-200/40 ring-1 ring-slate-700/40">
+              <div class="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-b from-rose-50 via-orange-50 to-amber-50">
+                <div class="absolute left-1/2 top-1.5 z-10 h-2.5 w-12 -translate-x-1/2 rounded-full bg-slate-900" aria-hidden="true"></div>
+                <img
+                  src="app-screenshot-4.png"
+                  alt="らくらく日記メーカーの操作画面 4"
+                  class="block h-auto min-h-[240px] w-full object-cover object-top sm:min-h-[280px]"
+                  onerror="this.classList.add('hidden'); document.getElementById('shot-fallback-4').classList.remove('hidden');"
+                />
+                <div id="shot-fallback-4" class="hidden flex min-h-[240px] flex-col items-center justify-center gap-2 px-3 py-10 text-center sm:min-h-[280px]">
+                  <div class="flex size-10 items-center justify-center rounded-xl bg-white/90 shadow-sm ring-1 ring-rose-100">
+                    <i data-lucide="smartphone" class="size-5 text-rose-400"></i>
+                  </div>
+                  <p class="text-[11px] font-bold text-rose-800">画面 4</p>
+                  <p class="text-[10px] leading-relaxed text-orange-800/70">
+                    <span class="font-bold text-orange-600">app-screenshot-4.png</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <figcaption class="mt-4 text-center text-sm text-orange-800/70">
+        ワンタップで行動を残し、空いた力で気持ちを書く
+      </figcaption>
+    </figure>
+
+    <section class="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+
+      <article class="rounded-2xl border border-orange-200/70 bg-white/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 text-white shadow-sm">
+            <i data-lucide="smartphone" class="size-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-rose-900 sm:text-lg">作ったもの</h2>
+        </div>
+        <p class="text-sm leading-relaxed text-orange-900/85 sm:text-[15px]">
+          ワンタップで日々の行動を記録できる自分専用アプリ「らくらく日記メーカー」。
+        </p>
+      </article>
+
+      <article class="rounded-2xl border border-orange-200/70 bg-white/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 text-white shadow-sm">
+            <i data-lucide="cloud-off" class="size-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-rose-900 sm:text-lg">解決する面倒・課題</h2>
+        </div>
+        <p class="text-sm leading-relaxed text-orange-900/85 sm:text-[15px]">
+          日々のルーチン（起床、家事など）をスマホで手入力する手間や、画面スクロールの煩わしさ。また、入力中にうっかり画面を閉じてデータが消えてしまう絶望感。
+        </p>
+      </article>
+
+      <article class="rounded-2xl border border-orange-200/70 bg-white/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-sm">
+            <i data-lucide="heart" class="size-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-rose-900 sm:text-lg">作りたいと思った理由</h2>
+        </div>
+        <p class="text-sm leading-relaxed text-orange-900/85 sm:text-[15px]">
+          1年以上日記を続ける中で、ルーチンの記録だけで疲弊してしまい、本当に書きたかった「感情」や「思考」を書く余裕が失われていたため。記録の負荷を極限まで下げて、自分の心と向き合う「心の余白」を生み出したかった。
+        </p>
+      </article>
+
+      <article class="rounded-2xl border border-orange-200/70 bg-white/75 p-5 shadow-sm backdrop-blur-sm sm:p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 text-white shadow-sm">
+            <i data-lucide="lightbulb" class="size-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-rose-900 sm:text-lg">工夫したポイントと苦戦したポイント</h2>
+        </div>
+        <div class="space-y-4">
+          <div class="rounded-xl border border-orange-100 bg-orange-50/50 p-4">
+            <p class="mb-1.5 text-xs font-bold text-orange-600">工夫した点</p>
+            <p class="text-sm leading-relaxed text-orange-900/85 sm:text-[15px]">
+              スマホでの片手操作に特化し、スクロール不要の1画面完結レイアウトと、下からせり上がるボトムシートUIを採用。また、localStorageによる自動保存機能を実装し、「絶対に消えない」安心感を実現した。
+            </p>
+          </div>
+          <div class="rounded-xl border border-rose-100 bg-rose-50/50 p-4">
+            <p class="mb-1.5 text-xs font-bold text-rose-600">苦戦した点</p>
+            <p class="text-sm leading-relaxed text-orange-900/85 sm:text-[15px]">
+              行動追加メニューの表示位置のUI調整。頭で考えたUIと実際の使い勝手が異なり苦戦したが、自作だからこそ即座に軌道修正を行い、最も直感的な形にたどり着くことができた。
+            </p>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <footer class="mt-12 border-t border-orange-200/60 pt-6 text-center">
+      <p class="text-xs text-orange-700/60">卒業制作 提出用ポスター — らくらく日記メーカー</p>
+    </footer>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

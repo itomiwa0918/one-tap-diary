@@ -1,6 +1,13 @@
 "use client"
 
 import { PressButton } from "@/components/press-button"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { COLOR, ROUTINES, type CustomRoutine } from "@/lib/routines"
 import { cn } from "@/lib/utils"
 
@@ -17,7 +24,7 @@ function RoutineChip({
     <PressButton
       onPress={onPress}
       className={cn(
-        "flex h-auto min-h-10 w-full items-center justify-center rounded-xl border px-2 py-2 text-sm font-medium",
+        "flex h-auto min-h-12 w-full items-center justify-center rounded-2xl border px-2 py-2.5 text-sm font-medium",
         className
       )}
     >
@@ -26,7 +33,7 @@ function RoutineChip({
   )
 }
 
-export function ActionMenu({
+export function ActionSheet({
   open,
   customRoutines,
   onSelect,
@@ -46,53 +53,57 @@ export function ActionMenu({
   if (!open) return null
 
   return (
-    <div className="mt-2 rounded-2xl border border-border bg-card p-2.5 shadow-sm">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-muted-foreground">行動を追加</p>
-        <PressButton
-          onPress={onClose}
-          className="inline-flex h-7 items-center justify-center rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted"
-        >
-          閉じる
-        </PressButton>
-      </div>
-      <div className="max-h-[36vh] overflow-y-auto">
-        <PressButton
-          onPress={onSelectTimeOnly}
-          className="mb-2 flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-300 bg-slate-100 px-2 py-2 text-sm font-medium text-slate-800 hover:bg-slate-200 active:bg-slate-200"
-        >
-          ⏱️ 時間のみ
-        </PressButton>
-        <div className="grid grid-cols-2 gap-2">
-          {ROUTINES.map((routine) => (
-            <RoutineChip
-              key={routine.id}
-              label={routine.label}
-              className={routine.className}
-              onPress={() =>
-                onSelect({
-                  label: routine.label,
-                  time: routine.defaultTime,
-                  subActions: routine.subActions,
-                })
-              }
-            />
-          ))}
-          {customRoutines.map((routine) => (
-            <RoutineChip
-              key={routine.id}
-              label={routine.label}
-              className={COLOR.custom}
-              onPress={() =>
-                onSelect({
-                  label: routine.label,
-                  time: "",
-                })
-              }
-            />
-          ))}
+    <Sheet open onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <SheetContent
+        side="bottom"
+        showCloseButton={false}
+        className="max-h-[80dvh] gap-0 rounded-t-3xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+      >
+        <SheetHeader className="px-5 pt-5 pb-3">
+          <SheetTitle>行動を追加</SheetTitle>
+          <SheetDescription>
+            タップして時刻を確認し、日記に残します。
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          <PressButton
+            onPress={onSelectTimeOnly}
+            className="mb-2.5 flex min-h-12 w-full items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 px-2 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-200 active:bg-slate-200"
+          >
+            ⏱️ 時間のみ
+          </PressButton>
+          <div className="grid grid-cols-2 gap-2.5">
+            {ROUTINES.map((routine) => (
+              <RoutineChip
+                key={routine.id}
+                label={routine.label}
+                className={routine.className}
+                onPress={() =>
+                  onSelect({
+                    label: routine.label,
+                    time: routine.defaultTime,
+                    subActions: routine.subActions,
+                  })
+                }
+              />
+            ))}
+            {customRoutines.map((routine) => (
+              <RoutineChip
+                key={routine.id}
+                label={routine.label}
+                className={COLOR.custom}
+                onPress={() =>
+                  onSelect({
+                    label: routine.label,
+                    time: "",
+                  })
+                }
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   )
 }

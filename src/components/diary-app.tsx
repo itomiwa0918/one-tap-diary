@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Send } from "lucide-react"
 
-import { ActionMenu } from "@/components/action-sheet"
+import { ActionSheet } from "@/components/action-sheet"
 import { PressButton } from "@/components/press-button"
 import { SettingsSheet } from "@/components/settings-sheet"
 import {
@@ -166,18 +166,20 @@ export function DiaryApp() {
     focusDiaryAt(result.cursor)
   }
 
-  function toggleActions() {
+  function openActions() {
     captureCursor()
-    setActionsOpen((open) => !open)
+    setActionsOpen(true)
   }
 
   function openStampDialog(next: StampDraft) {
     captureCursor()
     setActionsOpen(false)
     const time = next.time || formatTimeInput()
-    setDraft({ ...next, time })
-    setDialogTime(time)
-    setSubAction(next.subActions?.[0] ?? "")
+    window.setTimeout(() => {
+      setDraft({ ...next, time })
+      setDialogTime(time)
+      setSubAction(next.subActions?.[0] ?? "")
+    }, 160)
   }
 
   function closeStampDialog() {
@@ -192,9 +194,11 @@ export function DiaryApp() {
   function openTimeOnlyDialog() {
     captureCursor()
     setActionsOpen(false)
-    setStartTime(formatTimeInput())
-    setEndTime("")
-    setTimeOnlyOpen(true)
+    window.setTimeout(() => {
+      setStartTime(formatTimeInput())
+      setEndTime("")
+      setTimeOnlyOpen(true)
+    }, 160)
   }
 
   function confirmTimeOnly() {
@@ -289,19 +293,11 @@ export function DiaryApp() {
     >
       <header className="sticky top-0 z-30 shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <PressButton
-          onPress={toggleActions}
-          ariaExpanded={actionsOpen}
+          onPress={openActions}
           className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
         >
-          {actionsOpen ? "閉じる" : "＋ 行動を追加"}
+          ＋ 行動を追加
         </PressButton>
-        <ActionMenu
-          open={actionsOpen}
-          customRoutines={customRoutines}
-          onSelect={openStampDialog}
-          onSelectTimeOnly={openTimeOnlyDialog}
-          onClose={() => setActionsOpen(false)}
-        />
       </header>
 
       <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
@@ -379,6 +375,13 @@ export function DiaryApp() {
         </div>
       </section>
 
+      <ActionSheet
+        open={actionsOpen}
+        customRoutines={customRoutines}
+        onSelect={openStampDialog}
+        onSelectTimeOnly={openTimeOnlyDialog}
+        onClose={() => setActionsOpen(false)}
+      />
       <TimeOnlyDialog
         open={timeOnlyOpen}
         startTime={startTime}
