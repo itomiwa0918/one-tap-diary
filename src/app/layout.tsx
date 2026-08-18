@@ -52,7 +52,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${notoSansJP.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full overflow-hidden bg-background font-sans text-foreground">
-        <SerwistProvider swUrl="/serwist/sw.js">{children}</SerwistProvider>
+        <SerwistProvider
+          swUrl="/sw.js"
+          reloadOnOnline={false}
+          cacheOnNavigation
+          options={{ scope: "/" }}
+        >
+          {children}
+        </SerwistProvider>
       </body>
     </html>
   )

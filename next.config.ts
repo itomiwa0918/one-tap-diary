@@ -3,7 +3,10 @@ import { withSerwist } from "@serwist/turbopack"
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return [{ source: "/diagram", destination: "/index.html" }]
+    return [
+      { source: "/sw.js", destination: "/serwist/sw.js" },
+      { source: "/diagram", destination: "/index.html" },
+    ]
   },
 }
 
