@@ -124,14 +124,53 @@ export function DiaryApp() {
     }
   }, [])
 
+  function rememberCursor(
+    el: HTMLTextAreaElement,
+    source: "input" | "click" | "keyup" | "select"
+  ) {
+    const start = el.selectionStart ?? 0
+    const end = el.selectionEnd ?? 0
+    const collapsedAtStart = start === 0 && end === 0
+    const hadLaterCaret =
+      cursorRef.current.start > 0 || cursorRef.current.end > 0
+
+    // iOS Safari は blur 時に selection を 0 に戻し、select が発火する。
+    if (
+      source === "select" &&
+      collapsedAtStart &&
+      hadLaterCaret &&
+      el.value.length > 0
+    ) {
+      return
+    }
+
+    cursorRef.current = { start, end }
+    cursorTouchedRef.current = true
+  }
+
   function captureCursor() {
     const el = textareaRef.current
     if (!el || document.activeElement !== el) return
-    cursorTouchedRef.current = true
-    cursorRef.current = {
-      start: el.selectionStart ?? el.value.length,
-      end: el.selectionEnd ?? el.value.length,
+    rememberCursor(el, "select")
+  }
+
+  function getInsertRange() {
+    const el = textareaRef.current
+    if (el && document.activeElement === el) {
+      const start = el.selectionStart ?? 0
+      const end = el.selectionEnd ?? 0
+      const looksLikeIosReset =
+        start === 0 &&
+        end === 0 &&
+        el.value.length > 0 &&
+        (cursorRef.current.start > 0 || cursorRef.current.end > 0)
+      if (!looksLikeIosReset) {
+        return { start, end }
+      }
     }
+    if (cursorTouchedRef.current) return cursorRef.current
+    const len = text.length
+    return { start: len, end: len }
   }
 
   function focusDiaryAt(pos: number) {
@@ -158,9 +197,7 @@ export function DiaryApp() {
   }
 
   function insertStamp(stamp: string) {
-    const fallback = text.length
-    const start = cursorTouchedRef.current ? cursorRef.current.start : fallback
-    const end = cursorTouchedRef.current ? cursorRef.current.end : fallback
+    const { start, end } = getInsertRange()
     const result = insertAtCursor(text, stamp, start, end)
     applyText(result.text, result.cursor)
     focusDiaryAt(result.cursor)
@@ -323,19 +360,19 @@ export function DiaryApp() {
           ref={textareaRef}
           value={text}
           onChange={(event) => {
-            const next = event.target.value
-            cursorTouchedRef.current = true
-            cursorRef.current = {
-              start: event.target.selectionStart ?? next.length,
-              end: event.target.selectionEnd ?? next.length,
-            }
+            const next = event.currentTarget.value
+            rememberCursor(event.currentTarget, "input")
             applyText(next)
           }}
-          onSelect={captureCursor}
-          onClick={captureCursor}
-          onKeyUp={captureCursor}
-          onFocus={() => {
-            captureCursor()
+          onSelect={() => {
+            const el = textareaRef.current
+            if (el) rememberCursor(el, "select")
+          }}
+          onClick={(event) => rememberCursor(event.currentTarget, "click")}
+          onKeyUp={(event) => rememberCursor(event.currentTarget, "keyup")}
+          onTouchEnd={(event) => rememberCursor(event.currentTarget, "click")}
+          onFocus={(event) => {
+            rememberCursor(event.currentTarget, "select")
             window.scrollTo(0, 0)
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
