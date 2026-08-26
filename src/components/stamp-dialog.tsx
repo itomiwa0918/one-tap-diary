@@ -12,11 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  formatTimeInput,
-  replaceTimeMinutes,
-  TIME_SHORTCUTS,
-} from "@/lib/routines"
+import { formatTimeInput, replaceTimeMinutes } from "@/lib/routines"
 import { cn } from "@/lib/utils"
 
 export type StampDraft = {
@@ -36,50 +32,34 @@ function TimeQuickActions({
   onTimeChange: (time: string) => void
 }) {
   return (
-    <div className="mt-2 space-y-2">
-      <div className="flex flex-wrap gap-2">
-        <PressButton
-          onPress={() => onTimeChange(formatTimeInput())}
-          className={cn(
-            chipClassName,
-            "border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100"
-          )}
-        >
-          現在時刻
-        </PressButton>
-        <PressButton
-          onPress={() => onTimeChange(replaceTimeMinutes(time, "00"))}
-          className={cn(
-            chipClassName,
-            "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-          )}
-        >
-          00分
-        </PressButton>
-        <PressButton
-          onPress={() => onTimeChange(replaceTimeMinutes(time, "30"))}
-          className={cn(
-            chipClassName,
-            "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-          )}
-        >
-          30分
-        </PressButton>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {TIME_SHORTCUTS.map((shortcut) => (
-          <PressButton
-            key={shortcut.time}
-            onPress={() => onTimeChange(shortcut.time)}
-            className={cn(
-              chipClassName,
-              "border-yellow-200 bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
-            )}
-          >
-            {shortcut.time}（{shortcut.label}）
-          </PressButton>
-        ))}
-      </div>
+    <div className="mt-2 flex flex-wrap gap-2">
+      <PressButton
+        onPress={() => onTimeChange(formatTimeInput())}
+        className={cn(
+          chipClassName,
+          "border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100"
+        )}
+      >
+        現在時刻
+      </PressButton>
+      <PressButton
+        onPress={() => onTimeChange(replaceTimeMinutes(time, "00"))}
+        className={cn(
+          chipClassName,
+          "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+        )}
+      >
+        00分
+      </PressButton>
+      <PressButton
+        onPress={() => onTimeChange(replaceTimeMinutes(time, "30"))}
+        className={cn(
+          chipClassName,
+          "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+        )}
+      >
+        30分
+      </PressButton>
     </div>
   )
 }
