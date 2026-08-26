@@ -52,6 +52,15 @@ function TimeQuickActions({
         00分
       </PressButton>
       <PressButton
+        onPress={() => onTimeChange(replaceTimeMinutes(time, "15"))}
+        className={cn(
+          chipClassName,
+          "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+        )}
+      >
+        15分
+      </PressButton>
+      <PressButton
         onPress={() => onTimeChange(replaceTimeMinutes(time, "30"))}
         className={cn(
           chipClassName,

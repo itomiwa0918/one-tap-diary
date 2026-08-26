@@ -123,7 +123,7 @@ export function formatTimeInput(date = new Date()) {
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`
 }
 
-export function replaceTimeMinutes(time: string, minutes: "00" | "30") {
+export function replaceTimeMinutes(time: string, minutes: "00" | "15" | "30") {
   const hourPart = /^(\d{1,2})/.exec(time)?.[1]
   const hour = hourPart
     ? pad2(Math.min(23, Math.max(0, Number(hourPart))))
