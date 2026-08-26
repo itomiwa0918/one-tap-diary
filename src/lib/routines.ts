@@ -123,6 +123,19 @@ export function formatTimeInput(date = new Date()) {
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`
 }
 
+export const TIME_SHORTCUTS = [
+  { time: "08:30", label: "送り" },
+  { time: "18:15", label: "迎え" },
+] as const
+
+export function replaceTimeMinutes(time: string, minutes: "00" | "30") {
+  const hourPart = /^(\d{1,2})/.exec(time)?.[1]
+  const hour = hourPart
+    ? pad2(Math.min(23, Math.max(0, Number(hourPart))))
+    : formatTimeInput().slice(0, 2)
+  return `${hour}:${minutes}`
+}
+
 export function formatTitleDate(isoDate: string) {
   const [year, month, day] = isoDate.split("-")
   if (!year || !month || !day) return isoDate.replaceAll("-", "/")

@@ -12,12 +12,76 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  formatTimeInput,
+  replaceTimeMinutes,
+  TIME_SHORTCUTS,
+} from "@/lib/routines"
 import { cn } from "@/lib/utils"
 
 export type StampDraft = {
   label: string
   time: string
   subActions?: string[]
+}
+
+const chipClassName =
+  "inline-flex h-11 min-h-11 items-center justify-center rounded-2xl border px-3 text-sm font-medium"
+
+function TimeQuickActions({
+  time,
+  onTimeChange,
+}: {
+  time: string
+  onTimeChange: (time: string) => void
+}) {
+  return (
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <PressButton
+          onPress={() => onTimeChange(formatTimeInput())}
+          className={cn(
+            chipClassName,
+            "border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100"
+          )}
+        >
+          現在時刻
+        </PressButton>
+        <PressButton
+          onPress={() => onTimeChange(replaceTimeMinutes(time, "00"))}
+          className={cn(
+            chipClassName,
+            "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          00分
+        </PressButton>
+        <PressButton
+          onPress={() => onTimeChange(replaceTimeMinutes(time, "30"))}
+          className={cn(
+            chipClassName,
+            "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
+          )}
+        >
+          30分
+        </PressButton>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {TIME_SHORTCUTS.map((shortcut) => (
+          <PressButton
+            key={shortcut.time}
+            onPress={() => onTimeChange(shortcut.time)}
+            className={cn(
+              chipClassName,
+              "border-yellow-200 bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
+            )}
+          >
+            {shortcut.time}（{shortcut.label}）
+          </PressButton>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function StampDialog({
@@ -52,7 +116,7 @@ export function StampDialog({
     <Dialog open={draft !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         initialFocus={false}
-        className="top-[38%] z-[60] max-w-sm rounded-3xl p-5"
+        className="top-[38%] z-[60] max-h-[85dvh] max-w-sm overflow-y-auto rounded-3xl p-5"
         showCloseButton={false}
       >
         <DialogHeader>
@@ -62,22 +126,25 @@ export function StampDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <label className="block">
-          <span className="mb-1.5 block text-sm text-muted-foreground">
-            時刻
-          </span>
-          <input
-            ref={timeInputRef}
-            type="time"
-            autoFocus={false}
-            value={time}
-            onChange={(event) => onTimeChange(event.target.value)}
-            className={cn(
-              "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
-              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            )}
-          />
-        </label>
+        <div>
+          <label className="block">
+            <span className="mb-1.5 block text-sm text-muted-foreground">
+              時刻
+            </span>
+            <input
+              ref={timeInputRef}
+              type="time"
+              autoFocus={false}
+              value={time}
+              onChange={(event) => onTimeChange(event.target.value)}
+              className={cn(
+                "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
+                "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              )}
+            />
+          </label>
+          <TimeQuickActions time={time} onTimeChange={onTimeChange} />
+        </div>
 
         {subActions.length > 0 ? (
           <div>
@@ -160,7 +227,7 @@ export function TimeOnlyDialog({
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent
         initialFocus={false}
-        className="top-[38%] z-[60] max-w-sm rounded-3xl p-5"
+        className="top-[38%] z-[60] max-h-[85dvh] max-w-sm overflow-y-auto rounded-3xl p-5"
         showCloseButton={false}
       >
         <DialogHeader>
@@ -170,42 +237,48 @@ export function TimeOnlyDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <label className="block">
-          <span className="mb-1.5 block text-sm text-muted-foreground">
-            開始時刻（必須）
-          </span>
-          <input
-            ref={startRef}
-            type="time"
-            autoFocus={false}
-            required
-            value={startTime}
-            onChange={(event) => onStartTimeChange(event.target.value)}
-            className={timeFieldClassName}
-          />
-        </label>
+        <div>
+          <label className="block">
+            <span className="mb-1.5 block text-sm text-muted-foreground">
+              開始時刻（必須）
+            </span>
+            <input
+              ref={startRef}
+              type="time"
+              autoFocus={false}
+              required
+              value={startTime}
+              onChange={(event) => onStartTimeChange(event.target.value)}
+              className={timeFieldClassName}
+            />
+          </label>
+          <TimeQuickActions time={startTime} onTimeChange={onStartTimeChange} />
+        </div>
 
-        <label className="block">
-          <span className="mb-1.5 flex items-center justify-between text-sm text-muted-foreground">
-            終了時刻（任意）
-            {endTime ? (
-              <button
-                type="button"
-                className="text-xs text-foreground/70 underline-offset-2 hover:underline"
-                onClick={() => onEndTimeChange("")}
-              >
-                クリア
-              </button>
-            ) : null}
-          </span>
-          <input
-            type="time"
-            autoFocus={false}
-            value={endTime}
-            onChange={(event) => onEndTimeChange(event.target.value)}
-            className={timeFieldClassName}
-          />
-        </label>
+        <div>
+          <label className="block">
+            <span className="mb-1.5 flex items-center justify-between text-sm text-muted-foreground">
+              終了時刻（任意）
+              {endTime ? (
+                <button
+                  type="button"
+                  className="text-xs text-foreground/70 underline-offset-2 hover:underline"
+                  onClick={() => onEndTimeChange("")}
+                >
+                  クリア
+                </button>
+              ) : null}
+            </span>
+            <input
+              type="time"
+              autoFocus={false}
+              value={endTime}
+              onChange={(event) => onEndTimeChange(event.target.value)}
+              className={timeFieldClassName}
+            />
+          </label>
+          <TimeQuickActions time={endTime} onTimeChange={onEndTimeChange} />
+        </div>
 
         <DialogFooter className="mx-0 mb-0 flex-row rounded-none border-0 bg-transparent p-0">
           <PressButton
