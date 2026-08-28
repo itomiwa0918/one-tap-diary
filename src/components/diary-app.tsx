@@ -58,7 +58,6 @@ export function DiaryApp() {
   const cursorRef = useRef({ start: 0, end: 0 })
   const cursorTouchedRef = useRef(false)
   const pendingCursorRef = useRef<number | null>(null)
-  const [viewport, setViewport] = useState({ top: 0, height: "100dvh" })
 
   useEffect(() => {
     const saved = loadDiaryText()
@@ -95,33 +94,14 @@ export function DiaryApp() {
   }, [])
 
   useEffect(() => {
-    const visual = window.visualViewport
     const lockDocumentScroll = () => {
       window.scrollTo(0, 0)
       document.documentElement.scrollTop = 0
       document.body.scrollTop = 0
     }
-    const syncViewport = () => {
-      lockDocumentScroll()
-      if (!visual) {
-        setViewport({ top: 0, height: "100dvh" })
-        return
-      }
-      setViewport({
-        top: visual.offsetTop,
-        height: `${Math.round(visual.height)}px`,
-      })
-    }
-
-    syncViewport()
-    visual?.addEventListener("resize", syncViewport)
-    visual?.addEventListener("scroll", syncViewport)
+    lockDocumentScroll()
     window.addEventListener("scroll", lockDocumentScroll, { passive: true })
-    return () => {
-      visual?.removeEventListener("resize", syncViewport)
-      visual?.removeEventListener("scroll", syncViewport)
-      window.removeEventListener("scroll", lockDocumentScroll)
-    }
+    return () => window.removeEventListener("scroll", lockDocumentScroll)
   }, [])
 
   function rememberCursor(
@@ -324,20 +304,18 @@ export function DiaryApp() {
   }
 
   return (
-    <div
-      className="fixed inset-x-0 z-10 mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background"
-      style={{ top: viewport.top, height: viewport.height }}
-    >
-      <header className="sticky top-0 z-30 shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
-        <PressButton
-          onPress={openActions}
-          className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
-        >
-          ＋ 行動を追加
-        </PressButton>
-      </header>
+    <>
+      <div className="fixed inset-0 z-10 mx-auto flex w-full max-w-md flex-col overflow-hidden bg-background">
+        <header className="shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+          <PressButton
+            onPress={openActions}
+            className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+          >
+            ＋ 行動を追加
+          </PressButton>
+        </header>
 
-      <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-2 py-2">
           <Input
             id="diary-date"
@@ -411,6 +389,7 @@ export function DiaryApp() {
           </PressButton>
         </div>
       </section>
+      </div>
 
       <ActionSheet
         open={actionsOpen}
@@ -451,6 +430,6 @@ export function DiaryApp() {
         onRemove={removeCustomRoutine}
         onClose={() => setSettingsOpen(false)}
       />
-    </div>
+    </>
   )
 }

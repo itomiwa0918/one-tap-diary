@@ -122,10 +122,16 @@
     @apply border-border outline-ring/50;
   }
   html {
-    @apply h-full overflow-hidden font-sans;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    @apply font-sans;
   }
   body {
-    @apply h-full overflow-hidden bg-background text-foreground overscroll-none;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    @apply bg-background text-foreground overscroll-none;
   }
 }
 

@@ -30,14 +30,14 @@ export function SettingsSheet({
   onRemove: (id: string) => void
   onClose: () => void
 }) {
-  if (!open) return null
-
   return (
-    <Sheet open onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+    <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="max-h-[85dvh] gap-0 rounded-t-3xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="gap-0 rounded-t-3xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        initialFocus={false}
+        finalFocus={false}
       >
         <SheetHeader className="px-5 pt-5 pb-3">
           <SheetTitle>⚙️ 設定</SheetTitle>
@@ -46,7 +46,7 @@ export function SettingsSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-2">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-2">
           <section>
             <p className="mb-2.5 text-sm text-muted-foreground">新ボタン</p>
             <div className="flex gap-2">

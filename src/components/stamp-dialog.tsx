@@ -12,6 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { formatTimeInput, replaceTimeMinutes } from "@/lib/routines"
 import { cn } from "@/lib/utils"
 
@@ -23,6 +31,12 @@ export type StampDraft = {
 
 const chipClassName =
   "inline-flex h-11 min-h-11 items-center justify-center rounded-2xl border px-3 text-sm font-medium"
+
+const bottomSheetClassName =
+  "gap-0 rounded-t-3xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+
+const footerButtonClassName =
+  "inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl text-base font-medium"
 
 function TimeQuickActions({
   time,
@@ -102,81 +116,91 @@ export function StampDialog({
   }, [draft])
 
   return (
-    <Dialog open={draft !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        initialFocus={false}
-        className="top-[38%] z-[60] max-h-[85dvh] max-w-sm overflow-y-auto rounded-3xl p-5"
+    <Sheet open={draft !== null} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent
+        side="bottom"
         showCloseButton={false}
+        initialFocus={false}
+        finalFocus={false}
+        className={bottomSheetClassName}
       >
-        <DialogHeader>
-          <DialogTitle>{draft?.label}の時刻</DialogTitle>
-          <DialogDescription>
+        <SheetHeader className="px-5 pt-5 pb-3">
+          <SheetTitle>{draft?.label}の時刻</SheetTitle>
+          <SheetDescription>
             時刻が合っていれば、そのまま確定できます。
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div>
-          <label className="block">
-            <span className="mb-1.5 block text-sm text-muted-foreground">
-              時刻
-            </span>
-            <input
-              ref={timeInputRef}
-              type="time"
-              autoFocus={false}
-              value={time}
-              onChange={(event) => onTimeChange(event.target.value)}
-              className={cn(
-                "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
-                "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              )}
-            />
-          </label>
-          <TimeQuickActions time={time} onTimeChange={onTimeChange} />
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5">
+          <div>
+            <label className="block">
+              <span className="mb-1.5 block text-sm text-muted-foreground">
+                時刻
+              </span>
+              <input
+                ref={timeInputRef}
+                type="time"
+                autoFocus={false}
+                value={time}
+                onChange={(event) => onTimeChange(event.target.value)}
+                className={cn(
+                  "h-12 w-full rounded-2xl border border-input bg-background px-3 text-base outline-none",
+                  "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                )}
+              />
+            </label>
+            <TimeQuickActions time={time} onTimeChange={onTimeChange} />
+          </div>
+
+          {subActions.length > 0 ? (
+            <div>
+              <p className="mb-2 text-sm text-muted-foreground">内容</p>
+              <RadioGroup
+                value={subAction}
+                onValueChange={onSubActionChange}
+                className="gap-2"
+              >
+                {subActions.map((item) => (
+                  <label
+                    key={item}
+                    className={cn(
+                      "flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border px-3 touch-manipulation",
+                      subAction === item
+                        ? "border-green-300 bg-green-100 text-green-800"
+                        : "border-green-200 bg-green-50 text-green-800 hover:bg-green-100"
+                    )}
+                  >
+                    <RadioGroupItem value={item} />
+                    <span className="text-base font-medium">{item}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+          ) : null}
         </div>
 
-        {subActions.length > 0 ? (
-          <div>
-            <p className="mb-2 text-sm text-muted-foreground">内容</p>
-            <RadioGroup
-              value={subAction}
-              onValueChange={onSubActionChange}
-              className="gap-2"
-            >
-              {subActions.map((item) => (
-                <label
-                  key={item}
-                  className={cn(
-                    "flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border px-3 touch-manipulation",
-                    subAction === item
-                      ? "border-green-300 bg-green-100 text-green-800"
-                      : "border-green-200 bg-green-50 text-green-800 hover:bg-green-100"
-                  )}
-                >
-                  <RadioGroupItem value={item} />
-                  <span className="text-base font-medium">{item}</span>
-                </label>
-              ))}
-            </RadioGroup>
-          </div>
-        ) : null}
-
-        <DialogFooter className="mx-0 mb-0 flex-row rounded-none border-0 bg-transparent p-0">
+        <SheetFooter className="flex-row px-5">
           <PressButton
             onPress={onClose}
-            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
+            className={cn(
+              footerButtonClassName,
+              "border border-border bg-background"
+            )}
           >
             キャンセル
           </PressButton>
           <PressButton
             onPress={onConfirm}
-            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
+            className={cn(
+              footerButtonClassName,
+              "bg-primary text-primary-foreground"
+            )}
           >
             確定
           </PressButton>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -213,79 +237,89 @@ export function TimeOnlyDialog({
   }, [open])
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent
-        initialFocus={false}
-        className="top-[38%] z-[60] max-h-[85dvh] max-w-sm overflow-y-auto rounded-3xl p-5"
+    <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <SheetContent
+        side="bottom"
         showCloseButton={false}
+        initialFocus={false}
+        finalFocus={false}
+        className={bottomSheetClassName}
       >
-        <DialogHeader>
-          <DialogTitle>⏱️ 時間のみ</DialogTitle>
-          <DialogDescription>
+        <SheetHeader className="px-5 pt-5 pb-3">
+          <SheetTitle>⏱️ 時間のみ</SheetTitle>
+          <SheetDescription>
             開始時刻を入れて確定すると、日記に時刻だけ残ります。
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div>
-          <label className="block">
-            <span className="mb-1.5 block text-sm text-muted-foreground">
-              開始時刻（必須）
-            </span>
-            <input
-              ref={startRef}
-              type="time"
-              autoFocus={false}
-              required
-              value={startTime}
-              onChange={(event) => onStartTimeChange(event.target.value)}
-              className={timeFieldClassName}
-            />
-          </label>
-          <TimeQuickActions time={startTime} onTimeChange={onStartTimeChange} />
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5">
+          <div>
+            <label className="block">
+              <span className="mb-1.5 block text-sm text-muted-foreground">
+                開始時刻（必須）
+              </span>
+              <input
+                ref={startRef}
+                type="time"
+                autoFocus={false}
+                required
+                value={startTime}
+                onChange={(event) => onStartTimeChange(event.target.value)}
+                className={timeFieldClassName}
+              />
+            </label>
+            <TimeQuickActions time={startTime} onTimeChange={onStartTimeChange} />
+          </div>
+
+          <div>
+            <label className="block">
+              <span className="mb-1.5 flex items-center justify-between text-sm text-muted-foreground">
+                終了時刻（任意）
+                {endTime ? (
+                  <button
+                    type="button"
+                    className="text-xs text-foreground/70 underline-offset-2 hover:underline"
+                    onClick={() => onEndTimeChange("")}
+                  >
+                    クリア
+                  </button>
+                ) : null}
+              </span>
+              <input
+                type="time"
+                autoFocus={false}
+                value={endTime}
+                onChange={(event) => onEndTimeChange(event.target.value)}
+                className={timeFieldClassName}
+              />
+            </label>
+            <TimeQuickActions time={endTime} onTimeChange={onEndTimeChange} />
+          </div>
         </div>
 
-        <div>
-          <label className="block">
-            <span className="mb-1.5 flex items-center justify-between text-sm text-muted-foreground">
-              終了時刻（任意）
-              {endTime ? (
-                <button
-                  type="button"
-                  className="text-xs text-foreground/70 underline-offset-2 hover:underline"
-                  onClick={() => onEndTimeChange("")}
-                >
-                  クリア
-                </button>
-              ) : null}
-            </span>
-            <input
-              type="time"
-              autoFocus={false}
-              value={endTime}
-              onChange={(event) => onEndTimeChange(event.target.value)}
-              className={timeFieldClassName}
-            />
-          </label>
-          <TimeQuickActions time={endTime} onTimeChange={onEndTimeChange} />
-        </div>
-
-        <DialogFooter className="mx-0 mb-0 flex-row rounded-none border-0 bg-transparent p-0">
+        <SheetFooter className="flex-row px-5">
           <PressButton
             onPress={onClose}
-            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-background text-base font-medium"
+            className={cn(
+              footerButtonClassName,
+              "border border-border bg-background"
+            )}
           >
             キャンセル
           </PressButton>
           <PressButton
             onPress={onConfirm}
             disabled={!startTime}
-            className="inline-flex h-12 min-h-12 flex-1 items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+            className={cn(
+              footerButtonClassName,
+              "bg-primary text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
+            )}
           >
             確定
           </PressButton>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
 
