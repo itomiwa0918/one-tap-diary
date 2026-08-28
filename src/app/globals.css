@@ -125,6 +125,8 @@
     height: 100%;
     overflow: hidden;
     margin: 0;
+    --vv-height: 100dvh;
+    --keyboard-inset: 0px;
     @apply font-sans;
   }
   body {

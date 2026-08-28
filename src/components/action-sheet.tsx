@@ -66,7 +66,7 @@ export function ActionSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 [-webkit-overflow-scrolling:touch]">
           <PressButton
             onPress={onSelectTimeOnly}
             className="mb-2.5 flex min-h-12 w-full items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 px-2 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-200 active:bg-slate-200"

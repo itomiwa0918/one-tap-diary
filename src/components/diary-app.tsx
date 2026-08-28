@@ -183,8 +183,21 @@ export function DiaryApp() {
     focusDiaryAt(result.cursor)
   }
 
+  function dismissKeyboard() {
+    const el = textareaRef.current
+    if (el && document.activeElement === el) {
+      rememberCursor(el, "select")
+      el.blur()
+      return
+    }
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  }
+
   function openActions() {
     captureCursor()
+    dismissKeyboard()
     setActionsOpen(true)
   }
 
@@ -326,7 +339,10 @@ export function DiaryApp() {
             className="h-10 min-w-0 flex-1 rounded-xl bg-card px-3 text-base"
           />
           <PressButton
-            onPress={() => setSettingsOpen(true)}
+            onPress={() => {
+              dismissKeyboard()
+              setSettingsOpen(true)
+            }}
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
           >
             ⚙️ 設定
