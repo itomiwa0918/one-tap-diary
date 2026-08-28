@@ -31,6 +31,8 @@ import {
   subscribeCustomRoutines,
   writeCustomRoutines,
 } from "@/lib/routines"
+import { scrollCaretAboveKeyboard } from "@/lib/caret"
+import { subscribeKeyboardInsets } from "@/lib/visual-viewport"
 import { cn } from "@/lib/utils"
 
 export function DiaryApp() {
@@ -54,10 +56,24 @@ export function DiaryApp() {
     getCustomRoutinesServerSnapshot
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const scrollRef = useRef<HTMLSectionElement>(null)
   const copiedTimerRef = useRef<number | null>(null)
   const cursorRef = useRef({ start: 0, end: 0 })
   const cursorTouchedRef = useRef(false)
   const pendingCursorRef = useRef<number | null>(null)
+  const caretFrameRef = useRef(0)
+
+  function scheduleCaretScroll() {
+    cancelAnimationFrame(caretFrameRef.current)
+    caretFrameRef.current = requestAnimationFrame(() => {
+      caretFrameRef.current = requestAnimationFrame(() => {
+        const el = textareaRef.current
+        const scroller = scrollRef.current
+        if (!el || !scroller) return
+        scrollCaretAboveKeyboard(el, scroller)
+      })
+    })
+  }
 
   useEffect(() => {
     const saved = loadDiaryText()
@@ -83,6 +99,7 @@ export function DiaryApp() {
     el.setSelectionRange(pos, pos)
     cursorRef.current = { start: pos, end: pos }
     cursorTouchedRef.current = true
+    scheduleCaretScroll()
   }, [text])
 
   useEffect(() => {
@@ -100,8 +117,15 @@ export function DiaryApp() {
       document.body.scrollTop = 0
     }
     lockDocumentScroll()
+    const unlock = subscribeKeyboardInsets(() => {
+      scheduleCaretScroll()
+    })
     window.addEventListener("scroll", lockDocumentScroll, { passive: true })
-    return () => window.removeEventListener("scroll", lockDocumentScroll)
+    return () => {
+      unlock()
+      cancelAnimationFrame(caretFrameRef.current)
+      window.removeEventListener("scroll", lockDocumentScroll)
+    }
   }, [])
 
   function rememberCursor(
@@ -161,6 +185,7 @@ export function DiaryApp() {
       el.setSelectionRange(pos, pos)
       cursorRef.current = { start: pos, end: pos }
       cursorTouchedRef.current = true
+      scheduleCaretScroll()
     }
     requestAnimationFrame(apply)
     window.setTimeout(apply, 280)
@@ -328,7 +353,10 @@ export function DiaryApp() {
           </PressButton>
         </header>
 
-        <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <section
+          ref={scrollRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain [overflow-anchor:none] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        >
         <div className="flex items-center gap-2 py-2">
           <Input
             id="diary-date"
@@ -357,21 +385,29 @@ export function DiaryApp() {
             const next = event.currentTarget.value
             rememberCursor(event.currentTarget, "input")
             applyText(next)
+            scheduleCaretScroll()
           }}
           onSelect={() => {
             const el = textareaRef.current
             if (el) rememberCursor(el, "select")
           }}
-          onClick={(event) => rememberCursor(event.currentTarget, "click")}
-          onKeyUp={(event) => rememberCursor(event.currentTarget, "keyup")}
+          onClick={(event) => {
+            rememberCursor(event.currentTarget, "click")
+            scheduleCaretScroll()
+          }}
+          onKeyUp={(event) => {
+            rememberCursor(event.currentTarget, "keyup")
+            scheduleCaretScroll()
+          }}
           onTouchEnd={(event) => rememberCursor(event.currentTarget, "click")}
           onFocus={(event) => {
             rememberCursor(event.currentTarget, "select")
             window.scrollTo(0, 0)
+            scheduleCaretScroll()
           }}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
           rows={18}
-          className="diary-paper mb-3 min-h-[80dvh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
+          className="diary-paper mb-3 min-h-[80dvh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 pt-4 pb-[max(1rem,var(--keyboard-inset,0px))] text-base leading-7 field-sizing-content"
         />
         <div className="grid grid-cols-3 gap-2 pb-2">
           <PressButton
