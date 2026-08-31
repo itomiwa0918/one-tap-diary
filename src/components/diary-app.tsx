@@ -31,8 +31,6 @@ import {
   subscribeCustomRoutines,
   writeCustomRoutines,
 } from "@/lib/routines"
-import { revealTextareaCaret } from "@/lib/caret"
-import { isCoarsePointer, readTypingShellRect } from "@/lib/visual-viewport"
 import { cn } from "@/lib/utils"
 
 export function DiaryApp() {
@@ -56,67 +54,11 @@ export function DiaryApp() {
     getCustomRoutinesServerSnapshot
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const scrollRef = useRef<HTMLSectionElement>(null)
   const copiedTimerRef = useRef<number | null>(null)
   const cursorRef = useRef({ start: 0, end: 0 })
   const cursorTouchedRef = useRef(false)
   const pendingCursorRef = useRef<number | null>(null)
-  const diaryFocusedRef = useRef(false)
-  const revealTimersRef = useRef<number[]>([])
-  const layoutHeightRef = useRef(0)
-  const [typingViewport, setTypingViewport] = useState<{
-    top: number
-    height: number
-  } | null>(null)
-  const [compactPaper, setCompactPaper] = useState(false)
-
-  function setTypingClass(on: boolean) {
-    document.documentElement.classList.toggle("diary-typing", on)
-    document.body.classList.toggle("diary-typing", on)
-  }
-
-  function syncTypingViewport(heuristic = true) {
-    if (!diaryFocusedRef.current) {
-      layoutHeightRef.current = window.innerHeight
-      setTypingClass(false)
-      setTypingViewport(null)
-      setCompactPaper(false)
-      return
-    }
-    setCompactPaper(isCoarsePointer())
-    const next = readTypingShellRect(window, {
-      heuristic,
-      layoutHeight: layoutHeightRef.current || window.innerHeight,
-    })
-    const shrinking = next.height < window.innerHeight - 40
-    if (!shrinking) {
-      setTypingClass(false)
-      setTypingViewport(null)
-      return
-    }
-    setTypingClass(true)
-    setTypingViewport((current) => {
-      if (current?.top === next.top && current.height === next.height) {
-        return current
-      }
-      return next
-    })
-  }
-
-  function revealCaret(behavior: ScrollBehavior = "instant") {
-    const run = (nextBehavior: ScrollBehavior) => {
-      const el = textareaRef.current
-      const scroller = scrollRef.current
-      if (!el || !scroller || document.activeElement !== el) return
-      revealTextareaCaret(el, scroller, nextBehavior)
-    }
-
-    run(behavior)
-    revealTimersRef.current.forEach((id) => window.clearTimeout(id))
-    revealTimersRef.current = [50, 180, 350, 600].map((ms, index) =>
-      window.setTimeout(() => run(index === 0 ? behavior : "instant"), ms)
-    )
-  }
+  const [diaryFocused, setDiaryFocused] = useState(false)
 
   useEffect(() => {
     const saved = loadDiaryText()
@@ -142,7 +84,6 @@ export function DiaryApp() {
     el.setSelectionRange(pos, pos)
     cursorRef.current = { start: pos, end: pos }
     cursorTouchedRef.current = true
-    revealCaret("smooth")
   }, [text])
 
   useEffect(() => {
@@ -150,52 +91,6 @@ export function DiaryApp() {
       if (copiedTimerRef.current !== null) {
         window.clearTimeout(copiedTimerRef.current)
       }
-    }
-  }, [])
-
-  useEffect(() => {
-    const lockDocumentScroll = () => {
-      if (diaryFocusedRef.current) return
-      window.scrollTo(0, 0)
-      document.documentElement.scrollTop = 0
-      document.body.scrollTop = 0
-    }
-
-    const onViewport = () => {
-      syncTypingViewport(true)
-      if (diaryFocusedRef.current) revealCaret("smooth")
-    }
-
-    const onSelectionChange = () => {
-      if (document.activeElement !== textareaRef.current) return
-      revealCaret("instant")
-    }
-
-    const onInput = () => {
-      if (document.activeElement !== textareaRef.current) return
-      revealCaret("instant")
-    }
-
-    layoutHeightRef.current = window.innerHeight
-    lockDocumentScroll()
-    const visual = window.visualViewport
-    visual?.addEventListener("resize", onViewport)
-    visual?.addEventListener("scroll", onViewport)
-    window.addEventListener("resize", onViewport)
-    window.addEventListener("scroll", lockDocumentScroll, { passive: true })
-    document.addEventListener("selectionchange", onSelectionChange)
-    const textarea = textareaRef.current
-    textarea?.addEventListener("input", onInput)
-
-    return () => {
-      visual?.removeEventListener("resize", onViewport)
-      visual?.removeEventListener("scroll", onViewport)
-      window.removeEventListener("resize", onViewport)
-      window.removeEventListener("scroll", lockDocumentScroll)
-      document.removeEventListener("selectionchange", onSelectionChange)
-      textarea?.removeEventListener("input", onInput)
-      revealTimersRef.current.forEach((id) => window.clearTimeout(id))
-      setTypingClass(false)
     }
   }, [])
 
@@ -256,7 +151,6 @@ export function DiaryApp() {
       el.setSelectionRange(pos, pos)
       cursorRef.current = { start: pos, end: pos }
       cursorTouchedRef.current = true
-      revealCaret("smooth")
     }
     requestAnimationFrame(apply)
     window.setTimeout(apply, 280)
@@ -414,22 +308,8 @@ export function DiaryApp() {
 
   return (
     <>
-      <div
-        className={cn(
-          "z-10 mx-auto flex w-full max-w-md flex-col overflow-hidden bg-background",
-          typingViewport ? "fixed inset-x-0" : "fixed inset-0"
-        )}
-        style={
-          typingViewport
-            ? {
-                top: typingViewport.top,
-                height: typingViewport.height,
-                bottom: "auto",
-              }
-            : undefined
-        }
-      >
-        <header className="shrink-0 bg-background px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+      <div className="mx-auto min-h-dvh w-full max-w-md overflow-y-auto bg-background">
+        <header className="px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
           <PressButton
             onPress={openActions}
             className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-primary text-base font-medium text-primary-foreground"
@@ -438,10 +318,7 @@ export function DiaryApp() {
           </PressButton>
         </header>
 
-        <section
-          ref={scrollRef}
-          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain [overflow-anchor:none] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-        >
+        <section className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-2 py-2">
           <Input
             id="diary-date"
@@ -470,48 +347,23 @@ export function DiaryApp() {
             const next = event.currentTarget.value
             rememberCursor(event.currentTarget, "input")
             applyText(next)
-            revealCaret("instant")
           }}
           onSelect={() => {
             const el = textareaRef.current
             if (el) rememberCursor(el, "select")
           }}
-          onClick={(event) => {
-            rememberCursor(event.currentTarget, "click")
-            revealCaret("instant")
-          }}
-          onKeyUp={(event) => {
-            rememberCursor(event.currentTarget, "keyup")
-            revealCaret("instant")
-          }}
+          onClick={(event) => rememberCursor(event.currentTarget, "click")}
+          onKeyUp={(event) => rememberCursor(event.currentTarget, "keyup")}
           onTouchEnd={(event) => rememberCursor(event.currentTarget, "click")}
           onFocus={(event) => {
-            diaryFocusedRef.current = true
-            layoutHeightRef.current = window.innerHeight
             rememberCursor(event.currentTarget, "select")
-            setCompactPaper(isCoarsePointer())
-            syncTypingViewport(true)
-            revealCaret("smooth")
+            setDiaryFocused(true)
           }}
-          onBlur={() => {
-            diaryFocusedRef.current = false
-            layoutHeightRef.current = window.innerHeight
-            setTypingClass(false)
-            setTypingViewport(null)
-            setCompactPaper(false)
-            revealTimersRef.current.forEach((id) => window.clearTimeout(id))
-            revealTimersRef.current = []
-          }}
+          onBlur={() => setDiaryFocused(false)}
           placeholder={"＋ 行動を追加してから、\n今日の気持ちを書き足せます。"}
-          rows={compactPaper ? 8 : 18}
-          className={cn(
-            "diary-paper mb-3 w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content",
-            compactPaper ? "min-h-0" : "min-h-[80dvh]"
-          )}
+          rows={18}
+          className="diary-paper mb-3 min-h-[80dvh] w-full resize-none rounded-2xl border-border/80 bg-card px-4 py-4 text-base leading-7 field-sizing-content"
         />
-        {compactPaper ? (
-          <div className="h-40 shrink-0" aria-hidden="true" />
-        ) : null}
         <div className="grid grid-cols-3 gap-2 pb-2">
           <PressButton
             onPress={sendToShortcuts}
@@ -543,6 +395,9 @@ export function DiaryApp() {
             🗑️ クリア
           </PressButton>
         </div>
+        {diaryFocused ? (
+          <div className="h-[50vh] w-full shrink-0" aria-hidden="true" />
+        ) : null}
       </section>
       </div>
 

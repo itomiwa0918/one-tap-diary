@@ -122,24 +122,17 @@
     @apply border-border outline-ring/50;
   }
   html {
-    height: 100%;
-    overflow: hidden;
     margin: 0;
     --vv-height: 100dvh;
     --keyboard-inset: 0px;
     @apply font-sans;
   }
   body {
-    height: 100%;
-    overflow: hidden;
     margin: 0;
-    @apply bg-background text-foreground overscroll-none;
-  }
-  html.diary-typing,
-  html.diary-typing body {
-    height: auto;
-    max-height: none;
-    overflow: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    @apply bg-background text-foreground;
   }
 }
 
