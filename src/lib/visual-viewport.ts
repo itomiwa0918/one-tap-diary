@@ -15,6 +15,49 @@ function isEditableTarget(target: EventTarget | null) {
   )
 }
 
+const TYPING_OVERLAP_PX = 80
+const TYPING_KEYBOARD_FALLBACK_RATIO = 0.42
+const TYPING_KEYBOARD_FALLBACK_MAX = 360
+const TYPING_SHELL_MIN = 240
+
+export function isCoarsePointer(
+  win: Pick<Window, "matchMedia"> = window
+) {
+  return win.matchMedia("(hover: none), (pointer: coarse)").matches
+}
+
+export function readTypingShellRect(
+  win: Pick<Window, "innerHeight" | "visualViewport" | "matchMedia"> = window,
+  options: { heuristic?: boolean; layoutHeight?: number } = {}
+) {
+  const heuristic = options.heuristic ?? true
+  const visual = win.visualViewport
+  const inner = win.innerHeight
+  const top = Math.round(visual?.offsetTop ?? 0)
+  const visualHeight = Math.round(visual?.height ?? inner)
+  const overlap = Math.max(0, inner - visualHeight - top)
+  const layoutHeight = options.layoutHeight ?? inner
+  const contentResized = layoutHeight - inner >= TYPING_OVERLAP_PX
+
+  if (overlap >= TYPING_OVERLAP_PX) {
+    return { top, height: visualHeight }
+  }
+
+  if (contentResized) {
+    return { top: 0, height: Math.min(inner, visualHeight) }
+  }
+
+  if (heuristic && isCoarsePointer(win)) {
+    const reserved = Math.min(
+      Math.round(inner * TYPING_KEYBOARD_FALLBACK_RATIO),
+      TYPING_KEYBOARD_FALLBACK_MAX
+    )
+    return { top: 0, height: Math.max(TYPING_SHELL_MIN, inner - reserved) }
+  }
+
+  return { top, height: visualHeight }
+}
+
 export function readViewportMetrics(
   win: Pick<Window, "innerHeight" | "visualViewport"> = window,
   activeElement: EventTarget | null = document.activeElement

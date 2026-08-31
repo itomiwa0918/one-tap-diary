@@ -135,6 +135,12 @@
     margin: 0;
     @apply bg-background text-foreground overscroll-none;
   }
+  html.diary-typing,
+  html.diary-typing body {
+    height: auto;
+    max-height: none;
+    overflow: auto;
+  }
 }
 
 .diary-paper {

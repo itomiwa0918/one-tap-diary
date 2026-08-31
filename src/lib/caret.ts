@@ -75,24 +75,49 @@ export function getTextareaCaretRect(
   return { top, height: lineHeight, bottom: top + lineHeight }
 }
 
-export function scrollCaretAboveKeyboard(
+function getSentinel(scroller: HTMLElement) {
+  let sentinel = scroller.querySelector("[data-caret-sentinel]")
+  if (sentinel instanceof HTMLElement) return sentinel
+
+  sentinel = document.createElement("div")
+  sentinel.setAttribute("data-caret-sentinel", "")
+  sentinel.setAttribute("aria-hidden", "true")
+  const style = sentinel.style
+  style.position = "absolute"
+  style.left = "0"
+  style.width = "1px"
+  style.pointerEvents = "none"
+  scroller.appendChild(sentinel)
+  return sentinel
+}
+
+export function revealTextareaCaret(
   textarea: HTMLTextAreaElement,
-  scroller: HTMLElement
+  scroller: HTMLElement,
+  behavior: ScrollBehavior = "instant"
 ) {
   if (document.activeElement !== textarea) return
 
-  const visual = window.visualViewport
-  const visualTop = visual?.offsetTop ?? 0
-  const visualBottom = visualTop + (visual?.height ?? window.innerHeight)
-  const scrollerRect = scroller.getBoundingClientRect()
-  const clipTop = Math.max(scrollerRect.top, visualTop)
-  const clipBottom = Math.min(scrollerRect.bottom, visualBottom)
   const caret = getTextareaCaretRect(textarea)
-  const margin = 16
+  const scrollerRect = scroller.getBoundingClientRect()
+  const sentinel = getSentinel(scroller)
+  sentinel.style.top = `${caret.top - scrollerRect.top + scroller.scrollTop}px`
+  sentinel.style.height = `${Math.max(caret.height, 28)}px`
 
-  if (caret.bottom > clipBottom - margin) {
-    scroller.scrollTop += caret.bottom - (clipBottom - margin)
-  } else if (caret.top < clipTop + margin) {
-    scroller.scrollTop -= clipTop + margin - caret.top
+  const caretCenter =
+    caret.top - scrollerRect.top + scroller.scrollTop + caret.height / 2
+  const nextTop = Math.max(0, caretCenter - scroller.clientHeight / 2)
+  const viewBehavior = behavior === "smooth" ? "smooth" : "auto"
+
+  if (typeof scroller.scrollTo === "function") {
+    scroller.scrollTo({ top: nextTop, behavior: viewBehavior })
+  } else {
+    scroller.scrollTop = nextTop
   }
+
+  sentinel.scrollIntoView({
+    behavior: viewBehavior,
+    block: "center",
+    inline: "nearest",
+  })
 }
